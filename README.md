@@ -13,8 +13,8 @@ to the ESPHome directory of your Home Assistant.
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/hs4201.jpg">
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Limitations</h3>
-
 The software only provides a sub-set of the available data.
+
 Currently only some sensor values are working
 - Aussentemperatur
 - Kesselvorlaufisttemperatur
@@ -24,6 +24,7 @@ Currently only some sensor values are working
 - Kesselvorlaufsolltemperatur
 - Warmwassersolltemperatur
 - HK1 Vorlaufsolltemperatur
+
 Currently only some binary states are working
 - ST-Bit 0: Brenner EIN
 - ST-Bit 1: Ladepumpe Warmwasser
