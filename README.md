@@ -12,6 +12,32 @@ to the ESPHome directory of your Home Assistant.
 
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/hs4201.jpg">
 
+<h3 tabindex="-1" class="heading-element" dir="auto">Limitations</h3>
+<ul dir="auto">
+- the software only provides a sub-set of the available data.
+- currently only some sensor values are working
+  - Aussentemperatur
+  - Kesselvorlaufisttemperatur
+  - Warmwasseristtemperatur
+  - HK1 Vorlaufisttemperatur
+  - HK1 Mischerstellung
+  - Kesselvorlaufsolltemperatur
+  - Warmwassersolltemperatur
+  - HK1 Vorlaufsolltemperatur
+- currently only some binary states are working
+  - ST-Bit 0: Brenner EIN
+  - ST-Bit 1: Ladepumpe Warmwasser
+  - ST-Bit 2: Zirkulationspumpe Heizkörper
+  - ST-Bit 3: Mischer AUF
+  - ST-Bit 4: Mischer ZU
+  - ST-Bit 5: Brenner AUS
+  - ST-Bit 7: Zirkulationspumpe Fußboden
+  - BTR-Bit 0: Betrieb Tag
+  - BTR-Bit 1: Betrieb Automatik
+  - BTR-Bit 2: Betrieb Sommer
+- changing of input values is not supported.
+</ul>
+
 <h3 tabindex="-1" class="heading-element" dir="auto">Notes</h3>
 I'm working on this project as a hobby. My work on this software is in no way associated with a company. If you like to use it, or improve on it, feel free. Use it at your own risk - it might work perfectly or it might not.
 
