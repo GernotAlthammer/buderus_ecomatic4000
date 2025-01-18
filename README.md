@@ -13,7 +13,6 @@ to the ESPHome directory of your Home Assistant.
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/hs4201.jpg">
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Limitations</h3>
-<ul dir="auto">
 - the software only provides a sub-set of the available data.
 - currently only some sensor values are working
   - Aussentemperatur
@@ -36,7 +35,6 @@ to the ESPHome directory of your Home Assistant.
   - BTR-Bit 1: Betrieb Automatik
   - BTR-Bit 2: Betrieb Sommer
 - changing of input values is not supported.
-</ul>
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Notes</h3>
 I'm working on this project as a hobby. My work on this software is in no way associated with a company. If you like to use it, or improve on it, feel free. Use it at your own risk - it might work perfectly or it might not.
