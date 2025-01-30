@@ -36,6 +36,7 @@ Currently only some binary states are working
 - BTR-Bit 0: Betrieb Tag
 - BTR-Bit 1: Betrieb Automatik
 - BTR-Bit 2: Betrieb Sommer
+
 Changing of input values is not supported.
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Notes</h3>
