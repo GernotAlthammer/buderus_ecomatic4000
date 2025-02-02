@@ -10,7 +10,7 @@ To compile the ESPHome code for the ESP32 it is necessary to copy
 
 to the ESPHome directory of your Home Assistant.
 
-<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/hs4201.jpg">
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/hs4201.jpg" style="width: 80%;">
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Limitations</h3>
 The software only provides a sub-set of the available data.
