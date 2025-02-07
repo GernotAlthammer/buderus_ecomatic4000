@@ -1,5 +1,6 @@
 # buderus_ecomatic4000
 ESPHome code for Buderus Ecomatic 4000 HS4201 with KM2.0 Serial Module M404.
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/HA-Buderus-Panel.png" style="width: 80%;">
 
 The code is based on the software developed for the Logamatic 2107 KM271 serial module.
 https://github.com/the78mole/esphome_components/tree/main
@@ -9,8 +10,6 @@ To compile the ESPHome code for the ESP32 it is necessary to copy
 - and the file uart_read_line_sensor.h 
 
 to the ESPHome directory of your Home Assistant.
-
-<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/HA-Buderus-Panel.png" style="width: 80%;">
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Limitations</h3>
 The software only provides a sub-set of the available data.
