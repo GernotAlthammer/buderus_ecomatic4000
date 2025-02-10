@@ -25,4 +25,8 @@ This is the used RS232 interface module and pin-out
 
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7356.jpg" style="width: 60%;">
 
+The M404 module with the additional ESP32 + RS232 does fit nicely into the slot.
+
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/IMG_3732.JPG" style="width: 100%;">
+
 .
