@@ -7,7 +7,7 @@ The code is based on the KM271-WiFi-Module software developed as replacement of 
 
 See: https://github.com/the78mole/esphome_components/tree/main
 
-To compile the ESPHome code for the ESP32 it is necessary to copy
+To compile the ESPHome code for the ESP32 D1 Mini it is necessary to copy
 - the subdirectory and files from /my_components/km271_wifi
 - and the file uart_read_line_sensor.h 
 
