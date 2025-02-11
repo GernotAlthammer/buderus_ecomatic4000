@@ -3,7 +3,7 @@ ESPHome code for Buderus Ecomatic 4000 HS4201 with KM2.0 Serial Module M404.
 
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/HA-Buderus-Panel.png" style="width: 100%;">
 
-The code is based on the KM271-WiFi-Module software developed as replacement of Logamatic 2107 KM271 serial module.
+The code is based on the KM271-WiFi-Module software developed as replacement of KM271 serial module for the Buderus Logamatic 2017 control unit.
 
 See: https://github.com/the78mole/esphome_components/tree/main
 
