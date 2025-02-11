@@ -17,7 +17,7 @@ to the ESPHome directory of your Home Assistant.
 The software only provides a sub-set of the available data.
 
 Currently only some sensor values are working (see km271_params.h)
-- Aussentemperatur                  
+- Aussentemperatur                (0x2109)                  
 - Kesselvorlaufisttemperatur      (0x1105)
 - Warmwasseristtemperatur         (0x721A)
 - HK1 Vorlaufisttemperatur        (0x420f)
