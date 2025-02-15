@@ -15,12 +15,12 @@ to the ESPHome directory of your Home Assistant.
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Hardware</h3>
 An example of my hardware configuration ESP32 D1 Mini + RS232 module can be seen in the folder <a href="https://github.com/GernotAlthammer/buderus_ecomatic4000/tree/main/Example" rel="nofollow">Example</a>
-<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7350.jpg" style="width: 50%;">
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7350.jpg" style="width: 25%;">
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Limitations</h3>
 The software only provides a sub-set of the available data.
 
-Currently only some sensor values are working (see km271_params.h)
+Currently only some sensor values are working (see <a href="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/ESPHome/my_components/km271_wifi/km271_params.h" rel="nofollow">km271_params.h</a>)
 - Aussentemperatur                (0x2109)                  
 - Kesselvorlaufisttemperatur      (0x1105)
 - Warmwasseristtemperatur         (0x721A)
@@ -30,7 +30,7 @@ Currently only some sensor values are working (see km271_params.h)
 - Warmwassersolltemperatur        (0x320c)
 - HK1 Vorlaufsolltemperatur       (0x410e)
 
-Currently only some binary states are working (see km271_params.h)
+Currently only some binary states are working (see <a href="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/ESPHome/my_components/km271_wifi/km271_params.h" rel="nofollow">km271_params.h</a>)
 
 Steuer-Zustände                   (0x0803)
 - ST-Bit 0: Brenner EIN
