@@ -11,6 +11,10 @@
 ### 2024-11-24 Added Comment, Project Information and id names
 ### 2024-11-30 Changed WiFI LED to monochromatic LED
 ### 2024-12-01 Removed RED and GREEN LED IOs (not connected) and changed RX to BLUE Onboard-LED
+### 2025-01-18 Changed BUTTON commands to send via 3964R communication
+### 2025-01-31 Remove WLAN Fallback Password and enable ESP32 Bluetooth LE to Provide Wifi Credential
+### 2025-02-12 Deactivated Web-Server
+### 2025-03-05 Removed custom component (as not supported by ESPHome 2025 anymore)
 ###
 esphome:
   name: buderus-km271
@@ -27,13 +31,13 @@ esp32:
     type: arduino
 
 # enabel Web Server Interface
-web_server:
-  port: 80
-  version: 2
-  log: false
-  auth:
-    username: "buderus-km271"
-    password: !secret web_server_password
+#web_server:
+#  port: 80
+#  version: 2
+#  log: false
+#  auth:
+#    username: "buderus-km271"
+#    password: !secret web_server_password
 
 # Enable logging
 logger:
@@ -80,7 +84,7 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Buderus Fallback Hotspot"
-    password: "AlYX5iU5LAXz"
+#    password: "AlYX5iU5LAXz" # No Password
 
 
 #### ENABLE BLUETOOTH BLE TRACKER ################################
@@ -175,53 +179,67 @@ button:
 - platform: template
   name: "Tag-Betrieb - Manuell"
   id: km271_betr_t_manuell
-  on_press:
-    - uart.write:
-        id: uart_bus
-        data: [0x02]
-    - delay: 200ms
-    - uart.write:
-        id: uart_bus
-        data: [0x31, 0x08, 0x01, 0x10, 0x03, 0x2B]
+    - lambda:
+        uint8_t command[] = {0x31, 0x08, 0x01, 0x10, 0x03, 0x2B};
+        budoil->writer.enqueueTelegram(command, 8);
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x02]
+#    - delay: 200ms
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x31, 0x08, 0x01, 0x10, 0x03, 0x2B]
+
 
 # Umschaltung auf Tag-Betrieb Automatik
 - platform: template
   name: "Tag-Betrieb - Automatik"
   id: km271_betr_t_auto
   on_press:
-    - uart.write:
-        id: uart_bus
-        data: [0x02]
-    - delay: 200ms
-    - uart.write:
-        id: uart_bus
-        data: [0x31, 0x08, 0x03, 0x10, 0x03, 0x29]
+    - lambda:
+        uint8_t command[] = {0x31, 0x08, 0x03, 0x10, 0x03, 0x29};
+        budoil->writer.enqueueTelegram(command, 8);
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x02]
+#    - delay: 200ms
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x31, 0x08, 0x03, 0x10, 0x03, 0x29]
 
 # Umschaltung auf Nacht-Betrieb Manuell
 - platform: template
   name: "Nacht-Betrieb - Manuell"
   id: km271_betr_n_manuell
   on_press:
-    - uart.write:
-        id: uart_bus
-        data: [0x02]
-    - delay: 200ms
-    - uart.write:
-        id: uart_bus
-        data: [0x31, 0x08, 0x00, 0x10, 0x03, 0x2A]
+    - lambda:
+        uint8_t command[] = {0x31, 0x08, 0x00, 0x10, 0x03, 0x2A};
+        budoil->writer.enqueueTelegram(command, 8);
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x02]
+#    - delay: 200ms
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x31, 0x08, 0x00, 0x10, 0x03, 0x2A]
+
 
 # Umschaltung auf Nacht-Betrieb Automatik
 - platform: template
   name: "Nacht-Betrieb - Automatik"
   id: km271_betr_n_auto
   on_press:
-    - uart.write:
-        id: uart_bus
-        data: [0x02]
-    - delay: 200ms
-    - uart.write:
-        id: uart_bus
-        data: [0x31, 0x08, 0x02, 0x10, 0x03, 0x28]
+    - lambda:
+        uint8_t command[] = {0x31, 0x08, 0x02, 0x10, 0x03, 0x28};
+        budoil->writer.enqueueTelegram(command, 8);
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x02]
+#    - delay: 200ms
+#    - uart.write:
+#        id: uart_bus
+#        data: [0x31, 0x08, 0x02, 0x10, 0x03, 0x28]
+
 
 ##################################################################
 
@@ -509,10 +527,11 @@ sensor:
 
 #### SWITCH ######################################################
 switch:
-  # Nestart der seriellen Schnittstelle
+  # Neustart des ESP32
   - platform: restart
-    name: "WiFi Restart"
+    name: "ESP32 Restart"
     id: buderus_wifi_restart
+    entity_category: "diagnostic"
   - platform: template
     name: "KM271 UART RX"
     id: km271_uart_rx
@@ -534,15 +553,15 @@ text_sensor:
       name: "Firmware Steuerung"
       id: firmwareversion_steuerung
 
-  # RS232 data as Text-Sensor
-  - platform: custom
-    text_sensors:
-      name: "KM271 RS232 Output"
-      id: "km271rs232_txt"
-    lambda: |-
-      auto my_custom_sensor = new UartReadLineSensor(id(uart_bus));
-      App.register_component(my_custom_sensor);
-      return {my_custom_sensor};
+#  # RS232 data as Text-Sensor ## Removed as not supported by ESPhome 2025
+#  - platform: custom
+#    text_sensors:
+#      name: "KM271 RS232 Output"
+#      id: "km271rs232_txt"
+#    lambda: |-
+#      auto my_custom_sensor = new UartReadLineSensor(id(uart_bus));
+#      App.register_component(my_custom_sensor);
+#      return {my_custom_sensor};
 
   # Local WiFi Info as Text-Sensor
   - platform: wifi_info
