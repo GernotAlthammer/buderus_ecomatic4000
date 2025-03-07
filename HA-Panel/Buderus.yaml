@@ -1,0 +1,201 @@
+views:
+  - theme: Backend-selected
+    title: Heizung
+    path: heizung
+    icon: mdi:water-boiler
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: entities
+            entities:
+              - entity: binary_sensor.brenner_ein
+                name: Öl-Brenner
+                icon: mdi:fire
+              - entity: sensor.aussentemperatur
+                name: Außen-Temperatur
+              - entity: sensor.kesselvorlaufisttemperatur
+                secondary_info: none
+                name: Kessel-Temperatur
+              - entity: sensor.warmwasseristtemperatur
+                secondary_info: none
+                name: Warmwasser-Temperatur
+              - entity: sensor.hk1_vorlaufisttemperatur
+                secondary_info: none
+                name: Fußboden Vorlauftemperatur
+                icon: ''
+            title: Buderus Ecomatic 4000
+            show_header_toggle: false
+            state_color: true
+            header:
+              type: picture
+              image: /local/hs4201.png
+              tap_action:
+                action: none
+              hold_action:
+                action: none
+          - type: entities
+            entities:
+              - entity: sensor.kesselvorlaufsolltemperatur
+                name: Kesseltemperatur (Soll)
+              - entity: sensor.warmwassersolltemperatur
+                name: Warmwasser (Soll)
+              - entity: sensor.hk1_vorlaufsolltemperatur
+                name: Fußboden-Vorlauf (Soll)
+              - entity: sensor.hk1_mischerstellung
+                secondary_info: none
+                name: Fußboden Vorlauf-Mischer
+                icon: mdi:valve
+            state_color: true
+            show_header_toggle: false
+      - type: vertical-stack
+        cards:
+          - type: entities
+            entities:
+              - entity: binary_sensor.betrieb_tag
+                secondary_info: none
+              - entity: binary_sensor.betrieb_automatik
+                secondary_info: none
+              - entity: binary_sensor.btr_bit_2_an
+                name: Betrieb Sommer
+              - entity: binary_sensor.ladepumpe_warmwasser
+                icon: mdi:pump
+                name: Ladepumpe Warmwasser
+              - entity: binary_sensor.zirkulationspumpe_fussboden
+                icon: mdi:pump
+                name: Zirkulationspumpe Fußboden
+              - entity: binary_sensor.zirkulationspumpe_heizkorper
+                icon: mdi:pump
+                name: Zirkulationspumpe Heizkörper
+            title: Betriebszustände
+            show_header_toggle: false
+            state_color: true
+      - type: vertical-stack
+        cards:
+          - chart_type: bar
+            period: day
+            type: statistics-graph
+            entities:
+              - sensor.heizol_menge
+            stat_types:
+              - change
+            days_to_show: 14
+            hide_legend: true
+            title: Ölverbrauch (Tag)
+            min_y_axis: 0
+          - type: entities
+            entities:
+              - entity: sensor.oelverbrauch
+                name: Ölverbrauch (aktuell)
+              - entity: sensor.heizwert
+                name: Heizwert (aktuell)
+              - entity: sensor.heizol_tagesenergie
+              - entity: sensor.heizol_energie
+                name: Heizöl Gesamtenergie
+              - entity: sensor.heizol_tagesmenge
+              - entity: sensor.heizol_menge
+                name: Heizöl Gesamtmenge
+            show_header_toggle: false
+            state_color: true
+          - chart_type: bar
+            period: day
+            type: statistics-graph
+            entities:
+              - sensor.heizol_energie
+            stat_types:
+              - change
+            days_to_show: 14
+            title: Heizöl Energie
+            hide_legend: true
+            min_y_axis: 0
+            logarithmic_scale: false
+      - type: vertical-stack
+        cards:
+          - chart_type: bar
+            period: day
+            type: statistics-graph
+            entities:
+              - sensor.brenner_starts_heute
+            days_to_show: 14
+            stat_types:
+              - max
+            hide_legend: true
+            title: Brenner Starts
+            min_y_axis: 0
+          - type: entities
+            entities:
+              - entity: sensor.brenner_laufzeit_heute
+              - entity: sensor.brenner_starts_heute
+              - entity: sensor.brenner_laufzeit_gestern
+              - entity: sensor.brenner_starts_gestern
+            show_header_toggle: false
+            state_color: true
+      - type: vertical-stack
+        cards:
+          - type: entities
+            entities:
+              - entity: sensor.shelly1pm_349454784b56_power
+              - entity: sensor.brenner_leistung
+                name: Heizung mit Brenner
+              - entity: sensor.pumpe_fb_leistung
+                name: Zirkulationspumpe Fußboden
+              - entity: sensor.pumpe_hk_leistung
+                name: Zirkulationspumpe Heizkörper
+              - entity: sensor.pumpe_ww_leistung
+                name: Ladepumpe Warmwasser
+            title: Stromverbrauch
+            show_header_toggle: false
+            state_color: true
+          - chart_type: bar
+            period: day
+            type: statistics-graph
+            entities:
+              - sensor.shelly1pm_349454784b56_energy
+            stat_types:
+              - change
+            days_to_show: 14
+            hide_legend: true
+            title: Elektrische Energie
+            min_y_axis: 0
+      - chart_type: line
+        period: hour
+        type: statistics-graph
+        entities:
+          - sensor.temperatur_wohnzimmer
+          - sensor.temperatur_garage
+          - sensor.aussentemperatur
+        stat_types:
+          - mean
+        days_to_show: 7
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - graph: line
+                type: sensor
+                detail: 2
+                entity: sensor.internal_temp
+              - graph: line
+                type: sensor
+                detail: 2
+                entity: sensor.shelly1pm_349454784b56_device_temperature
+          - type: entities
+            entities:
+              - entity: binary_sensor.wifi_status
+              - entity: sensor.wifi_strenght
+              - entity: sensor.wifi_percent
+              - entity: switch.shelly1pm_349454784b56
+            state_color: true
+            show_header_toggle: false
+      - chart_type: bar
+        period: month
+        type: statistics-graph
+        entities:
+          - sensor.heizol_menge
+        stat_types:
+          - change
+        hide_legend: true
+        title: Ölverbrauch
+        min_y_axis: 0
+        days_to_show: 186
+title: Buderus
