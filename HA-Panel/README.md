@@ -1,4 +1,4 @@
-# HA Panel for Buderus Ecomatic 4000 cocuments
+# HA Panel for Buderus Ecomatic 4000 HS4201 control unit visualization
 
 This are example files of the Home Assistant Panel to show the values of the Buduerus Ecomatic 4000 HS4201 control unit
 
