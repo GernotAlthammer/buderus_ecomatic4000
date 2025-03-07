@@ -45,3 +45,8 @@ In addition for Home Assistant the following helpers are needed:
   - sensor.heizol_tagesmenge
   - input: sensor.heizol_menge
 
+Note: i have added a Shelly 1PM to the main power supply line inside the Buderus Ecomatic HS4201 conrol unit.
+By that i can monitor the total power consumption of the heating system including the water pumps.
+And in case of any malfunctions i can remotely switch off the complete heating system.
+
+:)
