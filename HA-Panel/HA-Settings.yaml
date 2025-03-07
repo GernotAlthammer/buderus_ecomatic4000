@@ -1,0 +1,148 @@
+################################################################################
+# configuration.yaml
+sensor: !include sensors.yaml
+################################################################################
+
+################################################################################
+# sensors.yaml
+#### Buderus Heizungsanlage ####################################################
+###
+# Ölverbrauch und Heizwert berechnen
+  - platform: template
+    sensors:
+      oelverbrauch:
+        friendly_name: "Ölverbrauch"
+        unique_id: "buderus_oelverbrauch"  # Ensure this is unique
+        unit_of_measurement: 'l/h'
+        value_template: >
+          {% if is_state('binary_sensor.brenner_ein', 'on') %}
+            {{ 2.26 }}
+          {% else %}
+            {{ 0 }}
+          {% endif %}
+
+      heizwert:
+        friendly_name: "Heizwert"
+        unique_id: "buderus_heizwert"
+        device_class: power
+        unit_of_measurement: 'kW'
+        value_template: >
+          {% if is_state('binary_sensor.brenner_ein', 'on') %}
+            {{ 2.26 * 9.8 }}
+          {% else %}
+            {{ 0 }}
+          {% endif %}
+
+### Berenner-Laufzeit und Anzahl der Brenner-Starts ermitteln
+# Brenner Laufzeit sein 0.00 Uhr
+  - platform: history_stats
+    name: Brenner Laufzeit heute
+    unique_id: sensor.brenner_laufzeit_heute
+    entity_id: binary_sensor.brenner_ein
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+# Brenner Anzahl der Starts sein 0.00 Uhr
+  - platform: history_stats
+    name: Brenner Starts heute
+    unique_id: sensor.brenner_starts_heute
+    entity_id: binary_sensor.brenner_ein
+    state: "on"
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+# Brenner Laufzeit der letzten 24 Stunden
+  - platform: history_stats
+    name: Brenner Laufzeit gestern
+    unique_id: sensor.brenner_laufzeit_gestern
+    entity_id: binary_sensor.brenner_ein
+    state: 'on'
+    type: time
+    end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+    duration:
+      hours: 24
+# Brenner Anzahl der Starts der letzten 24 Stunden
+  - platform: history_stats
+    name: Brenner Starts gestern
+    unique_id: sensor.brenner_starts_gestern
+    entity_id: binary_sensor.brenner_ein
+    state: 'on'
+    type: count
+    end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+    duration:
+      hours: 24
+
+#### Buderus Heizungsanlage ####################################################
+#### Buderus Gebläsemotor mit 240 Watt Verbrauch
+###
+  - platform: template
+    sensors:
+      brenner_leistung:
+        friendly_name: "Brenner Leistung"
+        unique_id: sensor.brenner_leistung
+        device_class: power
+        unit_of_measurement: 'W'
+        icon_template: mdi:water-boiler
+        value_template: >-
+          {% if is_state('binary_sensor.brenner_ein', 'on' ) %}
+            240
+          {% else %}
+            10
+          {% endif %}
+
+#### Pumpe Heizkreis Fussboden auf Stufe 2 mit 50 Watt Verbauch
+  - platform: template
+    sensors:
+      pumpe_fb_leistung:
+        friendly_name: "Pumpe FB"
+        unique_id: sensor.pumpe_fb_leistung
+        device_class: power
+        unit_of_measurement: 'W'
+        icon_template: mdi:lightning-bolt-circle
+        value_template: >-
+          {% if is_state('binary_sensor.zirkulationspumpe_fussboden', 'on' ) %}
+            50
+          {% elif is_state('binary_sensor.zirkulationspumpe_fussboden_2', 'on' ) %}
+            50
+          {% else %}
+            0
+          {% endif %}
+
+#### Pumpe Heizkreis Heizkörper auf Stufe 1 mit 40 Watt Verbauch
+  - platform: template
+    sensors:
+      pumpe_hk_leistung:
+        friendly_name: "Pumpe HK"
+        unique_id: sensor.pumpe_hk_leistung
+        device_class: power
+        unit_of_measurement: 'W'
+        icon_template: mdi:lightning-bolt-circle
+        value_template: >-
+          {% if is_state('binary_sensor.zirkulationspumpe_heizkorper', 'on' ) %}
+            40
+          {% elif is_state('binary_sensor.zirkulationspumpe_heizkorper_2', 'on' ) %}
+            40
+          {% else %}
+            0
+          {% endif %}
+
+#### Pumpe Warmwasser Aufladung auf Stufe 3 mit 75 Watt Verbauch
+  - platform: template
+    sensors:
+      pumpe_ww_leistung:
+        friendly_name: "Pumpe WW"
+        unique_id: sensor.pumpe_ww_leistung
+        device_class: power
+        unit_of_measurement: 'W'
+        icon_template: mdi:lightning-bolt-circle
+        value_template: >-
+          {% if is_state('binary_sensor.ladepumpe_warmwasser', 'on' ) %}
+            75
+          {% else %}
+            0
+          {% endif %}
+################################################################################
+
+
+
