@@ -1,4 +1,4 @@
-# HA Panel for Buderus Ecomatic 4000 HS4201 control unit visualization
+# HA Panel for Buderus Ecomatic 4000 HS4201 control unit
 
 This are example files of the Home Assistant Panel to show the values of the Buduerus Ecomatic 4000 HS4201 control unit
 
@@ -40,4 +40,8 @@ In addition for Home Assistant the following helpers are needed:
 - Verbrauchszähler / Consumption Sensor: Heizöl Tagesenergie
   - sensor.heizol_tagesenergie
   - input: sensor.heizol_energie
+
+- Verbrauchszähler / Consumption Sensor: Heizöl Tagesmenge
+  - sensor.heizol_tagesmenge
+  - input: sensor.heizol_menge
 
