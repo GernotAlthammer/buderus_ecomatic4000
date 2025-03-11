@@ -36,8 +36,8 @@ The M404 module with the additional ESP32 + RS232 does fit nicely into the slot.
 **Note:** The signal routing between the two D-Sub connectors is **1-to-1** and not cross-over.
 
 TTL-RS232 module --- color --------- RS232 of KM2.0 <br/>
-Pin 2 - RX ------------ orange -------- Pin 2 - TX<br/>
-Pin 3 - TX -------------- red ---------- Pin 3 - RX<br/>
+Pin 2 - RX ------------ orange -------- Pin 2 - RX<br/>
+Pin 3 - TX -------------- red ---------- Pin 3 - TX<br/>
 Pin 5 - GND ---------- brown -------- Pin 5 - GND<br/>
 
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/IMG_3732.JPG" style="width: 100%;">
