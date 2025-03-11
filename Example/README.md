@@ -40,6 +40,11 @@ Pin 2 - RX ------------ orange -------- Pin 2 - RX<br/>
 Pin 3 - TX -------------- red ---------- Pin 3 - TX<br/>
 Pin 5 - GND ---------- brown -------- Pin 5 - GND<br/>
 
-<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/IMG_3732.JPG" style="width: 100%;">
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/IMG_3732.JPG" style="width: 80%;">
+
+
+**Note:** I have not tested if the RS485 interface is working.<br/>
+It may require to change the setting of the DIP-switch S4 (default: switch 1 + 2 OFF) or S3 (default switch 1 + 2 ON).
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/M404_Front_Devices.JPG" style="width: 80%;">
 
 .
