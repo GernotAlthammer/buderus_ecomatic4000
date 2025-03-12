@@ -32,14 +32,19 @@ This is the used RS232 interface module and pin-out
 
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7356.jpg" style="width: 60%;">
 
-The M404 module with the additional ESP32 + RS232 does fit nicely into the slot.<br/>
-**Note:** Because of the RX/TX cross-over between the ESP32 and the TTL-RS232 module the signal lines between the two D-Sub connectors are **1-to-1** and not cross-over anymore!.
 
+<br/>
+**Note:** The TTL-RS232 module that i used have a male D-Sub connector (socket). Therfore the signal lines between the two D-Sub connectors are **1-to-1** and not cross-over anymore!.
+
+This is the cable wiring for my case:
+
+Plug connector ----------------------- Socket connector<br/>
 TTL-RS232 module --- color --------- RS232 of KM2.0 <br/>
 Pin 2 - RX ------------ orange -------- Pin 2 - RX<br/>
 Pin 3 - TX -------------- red ---------- Pin 3 - TX<br/>
 Pin 5 - GND ---------- brown -------- Pin 5 - GND<br/>
 
+The M404 module with the additional ESP32 + RS232 does fit nicely into the slot.<br/>
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/IMG_3732.JPG" style="width: 80%;">
 
 
