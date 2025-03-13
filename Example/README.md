@@ -11,7 +11,7 @@ The ESP32 and the RS232 board are mounted side by side on a carrier board that i
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7350.jpg" style="width: 80%;">
 
 
-The carrier board (50 x 70 mm) does have a few pins to mount and connect the ESP32 and the RS232, as well as the signal routing.<br/>
+The carrier board (50 x 70 mm) does have a few pins to mount and connect the ESP32 and the RS232, as well as the signal routing.
 **Note:** the RX/TX from ESP32 to the RS232 module is **cross-over!**
 
 ESP32 OI ------ connection ----- TTL-RS232 module (TTL pins)<br/>
@@ -32,8 +32,6 @@ This is the used RS232 interface module and pin-out
 
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7356.jpg" style="width: 60%;"><img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/rs232-pinout.jpg" style="width: 30%;">
 
-
-<br/>
 **Note:** The TTL-RS232 module that i used have a male D-Sub connector (socket). Therfore the signal lines between the two D-Sub connectors are **1-to-1** and not cross-over anymore!<br/>
 <br/>
 This is the cable wiring for my case:<br/>
