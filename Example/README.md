@@ -44,6 +44,11 @@ Pin 5 - GND ---------- brown -------- Pin 5 - GND<br/>
 The M404 module with the additional ESP32 + RS232 does fit nicely into the slot.<br/>
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/IMG_3732.JPG" style="width: 80%;">
 
+This is the wire diagram between ESP32 D1 Mini, the RS232 module and the KM2.0 module M404.
+
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/ESP32-RS232-M404_Wire-Diagram_001.png" style="width: 80%;">
+
+
 
 **Note:** I have not tested if the RS485 interface is working.<br/>
 It may require to change the setting of the DIP-switch S4 (default: switch 1 + 2 OFF) or S3 (default switch 1 + 2 ON).
