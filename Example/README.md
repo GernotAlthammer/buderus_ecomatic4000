@@ -20,7 +20,7 @@ TXD - GPIO1 --------------------- Pin RX <-<br/>
 GND - GND ---------------------- Pin GND<br/>
 VCC - VCC ------------------------ Pin VCC<br/>
 
-<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7353.jpg" style="width: 80%;">
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/IMG_7353B.jpg" style="width: 80%;">
 
 
 The power supply for ESP32 and RS232 can be taken from the M404 daughter board - comming from the M404 main board. 
