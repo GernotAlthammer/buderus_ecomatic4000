@@ -15,6 +15,8 @@
 ### 2025-01-31 Remove WLAN Fallback Password and enable ESP32 Bluetooth LE to Provide Wifi Credential
 ### 2025-02-12 Deactivated Web-Server
 ### 2025-03-05 Removed custom component (as not supported by ESPHome 2025 anymore)
+### 2025-03-09 Changes WIFI Fallback Password
+### 2025-03-16 Added HK1 Raumisttemperatur (Message A11F)
 ###
 esphome:
   name: buderus-km271
@@ -84,7 +86,12 @@ wifi:
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
     ssid: "Buderus Fallback Hotspot"
-#    password: "AlYX5iU5LAXz" # No Password
+    password: "1234567890" # No Password
+
+  # Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+esp32_improv:
+  authorizer: none
 
 
 #### ENABLE BLUETOOTH BLE TRACKER ################################
@@ -179,6 +186,7 @@ button:
 - platform: template
   name: "Tag-Betrieb - Manuell"
   id: km271_betr_t_manuell
+  on_press:
     - lambda:
         uint8_t command[] = {0x31, 0x08, 0x01, 0x10, 0x03, 0x2B};
         budoil->writer.enqueueTelegram(command, 8);
@@ -206,6 +214,7 @@ button:
 #    - uart.write:
 #        id: uart_bus
 #        data: [0x31, 0x08, 0x03, 0x10, 0x03, 0x29]
+
 
 # Umschaltung auf Nacht-Betrieb Manuell
 - platform: template
@@ -442,6 +451,8 @@ sensor:
       name: "HK1 Raumisttemperatur"
       id: hk1_raumisttemperatur
       entity_category: ""
+      filters: ## Bei ECOMATIC ist die Temperatur der Wert geteilt duch 10
+      - multiply: !lambda return 0.1;
 
     heating_circuit_1_pump_power:
       name: "HK1 Pumpenleistung"
