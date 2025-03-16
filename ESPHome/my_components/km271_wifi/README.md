@@ -36,6 +36,8 @@ An example yaml could be also found in this GIT repo.
           name: "HK1 Raumsolltemperatur"
         heating_circuit_1_room_temperature:
           name: "HK1 Raumisttemperatur"
+          filters: ## Bei ECOMATIC ist die Temperatur der Wert geteilt duch 10
+          - multiply: !lambda return 0.1;
         heating_circuit_1_pump_power:
           name: "HK1 Pumpenleistung"
         heating_circuit_1_mixer_position:
