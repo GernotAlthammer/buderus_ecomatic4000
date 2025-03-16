@@ -24,11 +24,12 @@ Currently only some sensor values are working (see <a href="https://github.com/G
 - Aussentemperatur                (0x2109)                  
 - Kesselvorlaufisttemperatur      (0x1105)
 - Warmwasseristtemperatur         (0x721A)
-- HK1 Vorlaufisttemperatur        (0x420f)
+- Raumisttemperatur               (0xA11F)
+- HK1 Vorlaufisttemperatur        (0x420F)
 - HK1 Mischerstellung             (0x6116)
 - Kesselvorlaufsolltemperatur     (0x1206)
-- Warmwassersolltemperatur        (0x320c)
-- HK1 Vorlaufsolltemperatur       (0x410e)
+- Warmwassersolltemperatur        (0x320C)
+- HK1 Vorlaufsolltemperatur       (0x410E)
 
 Currently only some binary states are working (see <a href="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/ESPHome/my_components/km271_wifi/km271_params.h" rel="nofollow">km271_params.h</a>)
 
