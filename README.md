@@ -24,7 +24,7 @@ Currently only some sensor values are working (see <a href="https://github.com/G
 - Aussentemperatur                (0x2109)                  
 - Kesselvorlaufisttemperatur      (0x1105)
 - Warmwasseristtemperatur         (0x721A)
-- Raumisttemperatur               (0xA11F)
+- HK1 Raumisttemperatur           (0xA11F)
 - HK1 Vorlaufisttemperatur        (0x420F)
 - HK1 Mischerstellung             (0x6116)
 - Kesselvorlaufsolltemperatur     (0x1206)
