@@ -22,7 +22,8 @@ enum Buderus_R2017_ParameterId {
     VITHK1    = 0x420f, //: "Vorlaufisttemperatur HK1"        (Grad)  ECOMATIC4000
 //    VITHK1    = 0x8003, //: "Vorlaufisttemperatur HK1"        (Grad)
     RSTHK1    = 0x8004, //: "Raumsolltemperatur HK1"          (Grad)
-    RITHK1    = 0x8005, //: "Raumisttemperatur HK1"           (Grad)
+    RITHK1    = 0xA11F, //: "Raumisttemperatur HK1"           (Grad)  ECOMATIC4000
+//    RITHK1    = 0x8005, //: "Raumisttemperatur HK1"           (Grad)
     EOZHK1    = 0x8006, //: "Einschaltoptimierungszeit HK1"
     AOZHK1    = 0x8007, //: "Ausschaltoptimierungszeit HK1"
     PLHK1     = 0x8008, //: "Pumpenleistung HK1"              (Prozent)
@@ -79,13 +80,16 @@ enum Buderus_R2017_ParameterId {
     ABTMP     = 0x8833, //: "Abgastemperatur"                 (Grad)
     MODBSTELL = 0x8834, //: "modulare Brenner Stellwert"
     NB11      = 0x8835, //: "nicht belegt"
-    BLZ1S2    = 0x8836, //: "Brennerlaufzeit 1 Minuten 2"
-    BLZ1S1    = 0x8837, //: "Brennerlaufzeit 1 Minuten 1"
-    BLZ1S0    = 0x831e, //: "Brennerlaufzeit 1 Minuten 0"  ECOMATIC4000
-//    BLZ1S0    = 0x8838, //: "Brennerlaufzeit 1 Minuten 0"
-    BLZ2S2    = 0x8839, //: "Brennerlaufzeit 2 Minuten 2"
-    BLZ2S1    = 0x883a, //: "Brennerlaufzeit 2 Minuten 1"
-    BLZ2S0    = 0x883b, //: "Brennerlaufzeit 2 Minuten 0"
+
+    BLZ1S2    = 0x8836, //: "Brennerlaufzeit 1 Minuten 2" = Minutes (*65536)
+    BLZ1S1    = 0x821D, //: "Brennerlaufzeit 1 Minuten 1" = Minutes (*256) ECOMATIC4000
+//    BLZ1S1    = 0x8837, //: "Brennerlaufzeit 1 Minuten 1" = Minutes (*256)
+    BLZ1S0    = 0x831E, //: "Brennerlaufzeit 1 Minuten 0"  ECOMATIC4000
+//    BLZ1S0    = 0x8838, //: "Brennerlaufzeit 1 Minuten 0" = Minutes (*1) + calculated sum of all 3 runtime values
+
+    BLZ2S2    = 0x8839, //: "Brennerlaufzeit 2 Minuten 2" = Minutes (*65536)
+    BLZ2S1    = 0x883a, //: "Brennerlaufzeit 2 Minuten 1" = Minutes (*256)
+    BLZ2S0    = 0x883b, //: "Brennerlaufzeit 2 Minuten 0" = Minutes (*1) + calculated sum of all 3 runtime values
 
     AT        = 0x2109, //: "Aussentemperatur"                (Grad)
 //    AT        = 0x893c, //: "Aussentemperatur"                (Grad)
@@ -424,7 +428,8 @@ static const t_Buderus_R2017_ParamDesc buderusParamDesc[] = {
     {heating_circuit_1_flow_target_temperature, VSTHK1, false, SensorType::UNSIGNED_INT, 0, "Vorlaufsolltemperatur HK1", "°C"},           // (Grad)
     {heating_circuit_1_flow_temperature, VITHK1, false, SensorType::UNSIGNED_INT, 0, "Vorlaufisttemperatur HK1", "°C"},            // (Grad)
     {heating_circuit_1_room_target_temperature, RSTHK1, false, SensorType::UNSIGNED_INT_DIVIDED_BY_2, 0, "Raumsolltemperatur HK1", "°C"}, // (Grad)
-    {heating_circuit_1_room_temperature, RITHK1, false, SensorType::UNSIGNED_INT_DIVIDED_BY_2, 0, "Raumisttemperatur HK1", "°C"},  // (Grad)
+    {heating_circuit_1_room_temperature, RITHK1, false, SensorType::UNSIGNED_INT, 0, "Raumisttemperatur HK1", "°C"},  // (Grad) ECOMATIC 4000
+    //{heating_circuit_1_room_temperature, RITHK1, false, SensorType::UNSIGNED_INT_DIVIDED_BY_2, 0, "Raumisttemperatur HK1", "°C"},  // (Grad)
     {no_transmission, EOZHK1, false, SensorType::UNSIGNED_INT, 0, "Einschaltoptimierungszeit HK1", ""},
     {no_transmission, AOZHK1, false, SensorType::UNSIGNED_INT, 0, "Ausschaltoptimierungszeit HK1", ""},
     {heating_circuit_1_pump_power, PLHK1, false, SensorType::UNSIGNED_INT, 0, "Pumpenleistung HK1", "%"}, // (Grad)
@@ -524,10 +529,14 @@ static const t_Buderus_R2017_ParamDesc buderusParamDesc[] = {
     {no_transmission, NB11, false, SensorType::NONE, 0, "nicht belegt", ""},
     {boiler_runtime_1, BLZ1S2, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 2, "Brennerlaufzeit 1 Minuten 2", "m"},
     {boiler_runtime_1, BLZ1S1, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 1, "Brennerlaufzeit 1 Minuten 1", "m"},
-    {boiler_runtime_1, BLZ1S0, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 0, "Brennerlaufzeit 1 Minuten 0", "m"},
+    {boiler_runtime_1, BLZ1S0, false, SensorType::UNSIGNED_INT, 0, "Brennerlaufzeit 1 Minuten 0", "m"},                       // ECOMATIC 4000
+    //{boiler_runtime_1, BLZ1S0, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 0, "Brennerlaufzeit 1 Minuten 0", "m"},
+    //
     {boiler_runtime_2, BLZ2S2, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 2, "Brennerlaufzeit 2 Minuten 2", "m"},
     {boiler_runtime_2, BLZ2S1, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 1, "Brennerlaufzeit 2 Minuten 1", "m"},
-    {boiler_runtime_2, BLZ2S0, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 0, "Brennerlaufzeit 2 Minuten 0", "m"},
+    {boiler_runtime_2, BLZ2S0, false, SensorType::UNSIGNED_INT, 0, "Brennerlaufzeit 2 Minuten 0", "m"},                       // ECOMATIC 4000
+    // {boiler_runtime_2, BLZ2S0, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 0, "Brennerlaufzeit 2 Minuten 0", "m"},
+    //
     {outdoor_temperature, AT, false, SensorType::SIGNED_INT, 0, "Aussentemperatur", "°C"},             // (Grad)
     {attenuated_outdoor_temperature, ATD, false, SensorType::SIGNED_INT, 0, "Gedaempfte Aussentemperatur", "°C"}, // (Grad)
     {firmware_version, VVK, false, SensorType::FIRMWARE_VERSION, 0, "Versionsnummer VK", ""},
