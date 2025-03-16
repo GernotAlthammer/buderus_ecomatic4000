@@ -19,7 +19,7 @@ enum Buderus_R2017_ParameterId {
     BW2HK1    = 0x8001, //: "Betriebswerte 2 HK1"
     VSTHK1    = 0x410e, //: "Vorlaufsolltemperatur HK1"       (Grad)  ECOMATIC4000
 //    VSTHK1    = 0x8002, //: "Vorlaufsolltemperatur HK1"       (Grad)
-    VITHK1    = 0x420f, //: "Vorlaufisttemperatur HK1"        (Grad)  ECOMATIC4000
+    VITHK1    = 0x420F, //: "Vorlaufisttemperatur HK1"        (Grad)  ECOMATIC4000
 //    VITHK1    = 0x8003, //: "Vorlaufisttemperatur HK1"        (Grad)
     RSTHK1    = 0x8004, //: "Raumsolltemperatur HK1"          (Grad)
     RITHK1    = 0xA11F, //: "Raumisttemperatur HK1"           (Grad)  ECOMATIC4000
