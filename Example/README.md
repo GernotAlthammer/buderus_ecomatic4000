@@ -54,4 +54,7 @@ This is the wire diagram between ESP32 D1 Mini, the RS232 module and the KM2.0 m
 It may require to change the setting of the DIP-switch S4 (default: switch 1 + 2 OFF) or S3 (default switch 1 + 2 ON).
 <img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Pictures/M404_Front_Devices.JPG" style="width: 80%;">
 
+This are the board dimensions for the small and big board.
+<img src="https://github.com/GernotAlthammer/buderus_ecomatic4000/blob/main/Example/M404_Boarddimensions.png" style="width: 80%;">
+
 .
