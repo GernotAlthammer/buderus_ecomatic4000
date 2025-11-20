@@ -86,12 +86,12 @@ enum Buderus_R2017_ParameterId {
 //    BLZ1S1    = 0x8837, //: "Brennerlaufzeit 1 Minuten 1" = Minutes (*256)
     BLZ1S0    = 0x831E, //: "Brennerlaufzeit 1 Minuten 0"  ECOMATIC4000
 //    BLZ1S0    = 0x8838, //: "Brennerlaufzeit 1 Minuten 0" = Minutes (*1) + calculated sum of all 3 runtime values
-
+    
     BLZ2S2    = 0x8839, //: "Brennerlaufzeit 2 Minuten 2" = Minutes (*65536)
     BLZ2S1    = 0x883a, //: "Brennerlaufzeit 2 Minuten 1" = Minutes (*256)
     BLZ2S0    = 0x883b, //: "Brennerlaufzeit 2 Minuten 0" = Minutes (*1) + calculated sum of all 3 runtime values
 
-    AT        = 0x2109, //: "Aussentemperatur"                (Grad)
+    AT        = 0x2109, //: "Aussentemperatur"                (Grad)  ECOMATIC4000
 //    AT        = 0x893c, //: "Aussentemperatur"                (Grad)
     ATD       = 0x893d, //: "gedaempfte Aussentemperatur"     (Grad)
     VVK       = 0x893e, //: "Versionsnummer VK"
@@ -101,6 +101,9 @@ enum Buderus_R2017_ParameterId {
 
     ALARM     = 0xaa42, //: "ERR_Alarmstatus"
 
+    STEUER    = 0x0803, //: "Steuerung Zustände Brenner und Mischer" ECOMATIC4000
+    BETRZU    = 0x4310, //: "Betriebszustände Tag/Nacht Automatik/Manuell" ECOMATIC4000
+    
     CFG000    = 0x0000, //: "#1 Sommer ab, #2 HK1 Nachttemp, #3 HK1 Tagtemp, #4 HK1 Betriebsart, #5 HK1 Urlaubstemp"
     CFG00E    = 0x000E, //: "#0 WW Betriebsart, #2 HK1 Max Temperatur, #4 HK1 Auslegungstemp"
     CFG015    = 0x0015, //: "#0 HK1 Aufschalttemp, #1 WW Vorrangschaltung, #2 HK1 Aussenhalt Umschalttemp"
@@ -114,7 +117,8 @@ enum Buderus_R2017_ParameterId {
     CFG069    = 0x0069, //: "#3 HK2 Temperatur Offset, #4 HK2 Fernbedienung, #5 Frost ab"
 
     CFG070    = 0x0070, //: "#2 Gebäudeart"
-    CFG07E    = 0x007e, //: "#3 WW Temperatur"
+    CFGWWT    = 0x7119, //: "WW Temperatur" (Grad)                                                                                   ECOMATIC4000
+//    CFG07E    = 0x007e, //: "#3 WW Temperatur"
     CFG085    = 0x0085, //: "#0 WW Betriebsart, #3 WW Aufbereitung, #5 WW Zirkulation"
     CFG093    = 0x0093, //: "#0 Sprache, #1 Anzeige"
     CFG09A    = 0x009a, //: "#1 Brennerart, #3 Max Kesseltemperatur"
@@ -123,9 +127,11 @@ enum Buderus_R2017_ParameterId {
     CFG100    = 0x0100, //: "#0 HK1 HK1 Heizprogramm, #3 HK1 Urlaub(stage)"
     CFG169    = 0x0169, //: "#0 HK1 HK1 Heizprogramm, #3 HK1 Urlaub(stage)"
     CFG1E0    = 0x01E0, //: "#0 Uhrzeit offset"
-
-    STEUER    = 0x0803, //: "Steuerung Zustände Brenner und Mischer" ECOMATIC4000
-    BETRZU    = 0x3108, //: "Betriebszustände Tag/Nacht Automatik/Manuell" ECOMATIC4000
+    
+    CFG197    = 0x0197, //: "#0 Warmwasser Temp Target, #1 Sommerbetrieb ab Temp, #3 Abgleich-Temp Raum 1, #5 Abgleich-Temp Raum 2"  ECOMATIC4000
+    CFG19E    = 0x019E, //: "#3 Heizzeiteingabe, #5 Sommer/Winter Zeitumstellung Automatisch"                                        ECOMATIC4000
+    CFG1AC    = 0x01AC, //: "#2 Anfang Tag, #3 Anfang Monat, #4 Jahr (1900+), #5 Ende Tag, #6 Ende Monat"                            ECOMATIC4000
+    CFG1B3    = 0x01B3, //: "#1 Ferien-Temp Raum 1"                                                                                  ECOMATIC4000
 
 //    CFG300    = 0x0300, //: "Fehlerspeicher1"
 //    CFG307    = 0x0307, //: "Fehlerspeicher2"
@@ -296,6 +302,14 @@ enum TransmissionParameter
     ww_switch_on_optimization,
     ww_target_temperature,
     ww_temperature,
+    betrzu_b0,
+    betrzu_b1,
+    betrzu_b2,
+    betrzu_b3,
+    betrzu_b4,
+    betrzu_b5,
+    betrzu_b6,
+    betrzu_b7,
     st_hs4201_b0,
     st_hs4201_b1,
     st_hs4201_b2,
@@ -304,14 +318,9 @@ enum TransmissionParameter
     st_hs4201_b5,
     st_hs4201_b6,
     st_hs4201_b7,
-    betrzu_b0,
-    betrzu_b1,
-    betrzu_b2,
-    betrzu_b3,
-    betrzu_b4,
-    betrzu_b5,
-    betrzu_b6,
-    betrzu_b7
+    config_heating_time_inputmode,
+    config_summer_winter_automode,
+    config_ww_temp_target
 };
 
 class Writer3964R;
@@ -392,7 +401,8 @@ static const t_Buderus_R2017_ParamDesc buderusParamDesc[] = {
     {config_heating_circuit_2_heating_program, CFG169, true, SensorType::BYTE_AT_OFFSET, 0, "CFG_HK1_Heizprogramm", ""},
     {config_heating_circuit_2_holiday_days, CFG169, true, SensorType::BYTE_AT_OFFSET, 3, "CFG_HK1_Urlaubstage", ""},
     // Konfiguration WW
-    {config_ww_temperature, CFG07E, true, SensorType::BYTE_AT_OFFSET, 3, "CFG_WW_Temperatur", "°C"},
+    {config_ww_temperature, CFGWWT, false, SensorType::UNSIGNED_INT, 0, "CFG_WW_Temperatur", "°C"},                                        // ECOMATIC4000
+    //{config_ww_temperature, CFG07E, true, SensorType::BYTE_AT_OFFSET, 3, "CFG_WW_Temperatur", "°C"},
     {config_ww_operation_mode, CFG085, true, SensorType::BYTE_AT_OFFSET, 0, "CFG_WW_Betriebsmodus", ""},
     {config_ww_priority_mode, CFG085, true, SensorType::BYTE_AT_OFFSET, 3, "CFG_WW_Vorrangschaltung", ""},
     {config_ww_circular_pump_interval, CFG085, true, SensorType::BYTE_AT_OFFSET, 5, "CFG_WW_Zirkulationspumpenintervall", ""},
@@ -404,7 +414,8 @@ static const t_Buderus_R2017_ParamDesc buderusParamDesc[] = {
     // {config_blr_burner_modulation_min, CFG0A8, true, SensorType::BYTE_AT_OFFSET, 0, "CFG_BLR_Brennermodulationsleistung Minimal", ""},
     // {config_blr_burner_runtime_min, CFG0A8, true, SensorType::BYTE_AT_OFFSET, 1, "CFG_BLR_Brennerlaufzeit Minimal", ""},
     // Konfiguration Sonstiges
-    {config_summer_winter_switch_temperature, CFG000, true, SensorType::BYTE_AT_OFFSET, 1, "CFG_Sommer_Winter Umschalttemperatur", "°C"},
+    {config_summer_winter_switch_temperature, CFG197, true, SensorType::BYTE_AT_OFFSET, 1, "CFG_Sommer_Winter Umschalttemperatur", "°C"},  // ECOMATIC4000
+    //{config_summer_winter_switch_temperature, CFG000, true, SensorType::BYTE_AT_OFFSET, 1, "CFG_Sommer_Winter Umschalttemperatur", "°C"},
     //{config_blr_building_type, CFG070, true, SensorType::BYTE_AT_OFFSET, 2, "CFG_BLR_Gebaeudeart", ""},
     //{config_time_offset, CFG1E0, true, SensorType::BYTE_AT_OFFSET, 1, "CFG_Uhrzeit offset", ""},
     // Betriebswerte 1 HK1
@@ -530,7 +541,7 @@ static const t_Buderus_R2017_ParamDesc buderusParamDesc[] = {
     {boiler_runtime_1, BLZ1S2, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 2, "Brennerlaufzeit 1 Minuten 2", "m"},
     {boiler_runtime_1, BLZ1S1, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 1, "Brennerlaufzeit 1 Minuten 1", "m"},
     {boiler_runtime_1, BLZ1S0, false, SensorType::UNSIGNED_INT, 0, "Brennerlaufzeit 1 Minuten 0", "m"},                       // ECOMATIC 4000
-    //{boiler_runtime_1, BLZ1S0, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 0, "Brennerlaufzeit 1 Minuten 0", "m"},
+    // {boiler_runtime_1, BLZ1S0, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 0, "Brennerlaufzeit 1 Minuten 0", "m"},
     //
     {boiler_runtime_2, BLZ2S2, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 2, "Brennerlaufzeit 2 Minuten 2", "m"},
     {boiler_runtime_2, BLZ2S1, false, SensorType::MULTI_PARAMETER_UNSIGNED_INTEGER, 1, "Brennerlaufzeit 2 Minuten 1", "m"},
@@ -552,22 +563,26 @@ static const t_Buderus_R2017_ParamDesc buderusParamDesc[] = {
     {no_transmission, ALARM, false, SensorType::BIT_AT_OFFSET, 5, "Alarm 20", ""},
     {alarm_heating_circuit_2_flow_sensor, ALARM, false, SensorType::BIT_AT_OFFSET, 6, "Alarm HK2 Vorlauffuehler", ""},
     {no_transmission, ALARM, false, SensorType::BIT_AT_OFFSET, 7, "Alarm 80", ""},
-    {st_hs4201_b0, STEUER, false, SensorType::BIT_AT_OFFSET, 0, "Brenner EIN", ""}, // ######## ECOMATIC 4000
-    {st_hs4201_b1, STEUER, false, SensorType::BIT_AT_OFFSET, 1, "ST-Bit 1 AN", ""},
-    {st_hs4201_b2, STEUER, false, SensorType::BIT_AT_OFFSET, 2, "ST-Bit 2 AN", ""},
-    {st_hs4201_b3, STEUER, false, SensorType::BIT_AT_OFFSET, 3, "Mischer AUF", ""},
-    {st_hs4201_b4, STEUER, false, SensorType::BIT_AT_OFFSET, 4, "Mischer ZU", ""},
-    {st_hs4201_b5, STEUER, false, SensorType::BIT_AT_OFFSET, 5, "Brenner AUS", ""},
-    {st_hs4201_b6, STEUER, false, SensorType::BIT_AT_OFFSET, 6, "ST-Bit 6 AN", ""},
-    {st_hs4201_b7, STEUER, false, SensorType::BIT_AT_OFFSET, 7, "ST-Bit 7 AN", ""},
     {betrzu_b0, BETRZU, false, SensorType::BIT_AT_OFFSET, 0, "Betrieb Tag", ""}, // ######## ECOMATIC 4000
     {betrzu_b1, BETRZU, false, SensorType::BIT_AT_OFFSET, 1, "Betrieb Automatik", ""},
     {betrzu_b2, BETRZU, false, SensorType::BIT_AT_OFFSET, 2, "BTR Bit 2 AN", ""},
     {betrzu_b3, BETRZU, false, SensorType::BIT_AT_OFFSET, 3, "BTR Bit 3 AN", ""},
-    {betrzu_b4, BETRZU, false, SensorType::BIT_AT_OFFSET, 1, "BTR Bit 4 AN", ""},
-    {betrzu_b5, BETRZU, false, SensorType::BIT_AT_OFFSET, 1, "BTR Bit 5 AN", ""},
-    {betrzu_b6, BETRZU, false, SensorType::BIT_AT_OFFSET, 1, "BTR Bit 6 AN", ""},
-    {betrzu_b7, BETRZU, false, SensorType::BIT_AT_OFFSET, 1, "BTR Bit 7 AN", ""},
+    {betrzu_b4, BETRZU, false, SensorType::BIT_AT_OFFSET, 4, "BTR Bit 4 AN", ""},
+    {betrzu_b5, BETRZU, false, SensorType::BIT_AT_OFFSET, 5, "BTR Bit 5 AN", ""},
+    {betrzu_b6, BETRZU, false, SensorType::BIT_AT_OFFSET, 6, "BTR Bit 6 AN", ""},
+    {betrzu_b7, BETRZU, false, SensorType::BIT_AT_OFFSET, 7, "BTR Bit 7 AN", ""},
+    {st_hs4201_b0, STEUER, false, SensorType::BIT_AT_OFFSET, 0, "Brenner EIN", ""}, // ######## ECOMATIC 4000
+    {st_hs4201_b1, STEUER, false, SensorType::BIT_AT_OFFSET, 1, "Ladepumpe Warmwasser", ""},
+    {st_hs4201_b2, STEUER, false, SensorType::BIT_AT_OFFSET, 2, "Zirkulationspumpe Heizkörper", ""},
+    {st_hs4201_b3, STEUER, false, SensorType::BIT_AT_OFFSET, 3, "Mischer AUF", ""},
+    {st_hs4201_b4, STEUER, false, SensorType::BIT_AT_OFFSET, 4, "Mischer ZU", ""},
+    {st_hs4201_b5, STEUER, false, SensorType::BIT_AT_OFFSET, 5, "Brenner AUS", ""},
+    {st_hs4201_b6, STEUER, false, SensorType::BIT_AT_OFFSET, 6, "ST-Bit 6 AN", ""},
+    {st_hs4201_b7, STEUER, false, SensorType::BIT_AT_OFFSET, 7, "Zirkulationspumpe Fußboden", ""},
+    {config_heating_time_inputmode, CFG19E, true, SensorType::BYTE_AT_OFFSET, 3, "CFG_Heizzeit_Eingabe", ""},
+    {config_summer_winter_automode, CFG19E, true, SensorType::BYTE_AT_OFFSET, 5, "CFG_Sommer_Winter_Automodus", ""},
+    {config_ww_temp_target, CFG197, false, SensorType::BYTE_AT_OFFSET, 0, "CFG_WW_Temp_Ziel", "°C"},  // (Grad) 
 };
 }
 }
+
