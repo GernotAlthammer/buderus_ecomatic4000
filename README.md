@@ -7,9 +7,8 @@ The code is based on the KM271-WiFi-Module software developed as replacement of 
 
 See: https://github.com/the78mole/esphome_components/tree/main
 
-To compile the ESPHome code for the ESP32 D1 Mini it is necessary to copy
-- the subdirectory and files from /my_components/km271_wifi
-to the ESPHome directory of your Home Assistant.
+Note: To compile the ESPHome code for the ESP32 D1 Mini it is no longer necessary to copy the subdirectory and files from "/esphome/components/km271_wifi" to the ESPHome directory of your Home Assistant.
+
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Hardware</h3>
 An example of my hardware configuration ESP32 D1 Mini + RS232 module can be seen in the folder <a href="https://github.com/GernotAlthammer/buderus_ecomatic4000/tree/main/Example" rel="nofollow">Example</a>
