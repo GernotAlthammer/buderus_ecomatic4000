@@ -18,6 +18,7 @@
 ### 2025-03-09 Changes WIFI Fallback Password
 ### 2025-03-16 Added HK1 Raumisttemperatur (Message A11F)
 ### 2025-11-21 Removed include of uart_read_line_sensor
+### 2025-11-21 Change to inlude external compunents from Github
 ###
 esphome:
   name: buderus-km271
@@ -110,9 +111,12 @@ captive_portal:
 
 #### EXTERNAL COMPONENTS #########################################
 external_components:
-  - source:
-      type: local
-      path: /config/esphome/my_components
+  - source: github://GernotAlthammer/buderus_ecomatic4000@main
+    components: [km271_wifi]
+    refresh: 0s
+#  - source:
+#      type: local
+#      path: /config/esphome/my_components
  
 km271_wifi:
   - id: budoil
