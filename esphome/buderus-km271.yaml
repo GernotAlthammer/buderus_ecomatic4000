@@ -17,6 +17,7 @@
 ### 2025-03-05 Removed custom component (as not supported by ESPHome 2025 anymore)
 ### 2025-03-09 Changes WIFI Fallback Password
 ### 2025-03-16 Added HK1 Raumisttemperatur (Message A11F)
+### 2025-11-21 Removed include of uart_read_line_sensor
 ###
 esphome:
   name: buderus-km271
@@ -24,8 +25,8 @@ esphome:
   project:
     name: "ESP32.Buderus Ecomatic 4000"
     version: "2024.11.24"
-  includes:
-    - uart_read_line_sensor.h
+#  includes:
+#    - uart_read_line_sensor.h
  
 esp32:
   board: esp32dev
