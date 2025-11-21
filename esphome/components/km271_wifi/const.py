@@ -39,7 +39,8 @@ CONF_HC2_DESIGN_TEMP        = "config_heating_circuit_2_design_temperature"
 CONF_HC2_ROOMT_OFFSET       = "config_heating_circuit_2_room_temperature_offset"
 CONF_HC2_HOLIDAY_DAYS       = "config_heating_circuit_2_holiday_days"
 
-CONF_WW_TEMP_TARGET         = "config_ww_temperature"
+CONF_WW_TEMP_TARGET         = "config_ww_temp_target"
+CONF_WW_TEMPERATURE         = "config_ww_temperature"
 CONF_WW_PRIORITY            = "config_ww_priority_mode"
 
 CONF_BLR_TEMP_MAX           = "config_blr_temperature_max"
