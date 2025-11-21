@@ -54,6 +54,7 @@ TYPES = [
     OUTDOOR_TEMP_ATT,
     BOILER_RUNTIME_1,
     BOILER_RUNTIME_2,
+    CONF_WW_TEMPERATURE,
 ]
 
 
@@ -259,6 +260,13 @@ CONFIG_SCHEMA = (
                 accuracy_decimals=0,
                 device_class=DEVICE_CLASS_DURATION,
                 state_class=STATE_CLASS_TOTAL_INCREASING,
+                entity_category=ENTITY_CATEGORY_NONE,
+            ),
+            cv.Optional(CONF_WW_TEMPERATURE): sensor.sensor_schema(
+                unit_of_measurement=UNIT_CELSIUS,
+                accuracy_decimals=0,
+                device_class=DEVICE_CLASS_TEMPERATURE,
+                state_class=STATE_CLASS_MEASUREMENT,
                 entity_category=ENTITY_CATEGORY_NONE,
             )
         }
