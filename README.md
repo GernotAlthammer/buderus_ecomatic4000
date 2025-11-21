@@ -9,8 +9,6 @@ See: https://github.com/the78mole/esphome_components/tree/main
 
 To compile the ESPHome code for the ESP32 D1 Mini it is necessary to copy
 - the subdirectory and files from /my_components/km271_wifi
-- and the file uart_read_line_sensor.h 
-
 to the ESPHome directory of your Home Assistant.
 
 <h3 tabindex="-1" class="heading-element" dir="auto">Hardware</h3>
