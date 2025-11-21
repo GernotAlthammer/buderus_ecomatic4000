@@ -160,8 +160,8 @@ CONFIG_SCHEMA = (
                 cv.Optional(CONF_MIN_VALUE, default=0): cv.float_,
                 cv.Optional(CONF_STEP, default=1): cv.positive_float,
             }),
-
-            cv.GenerateID(CONF_KM271_ID): cv.use_id(KM271),
+#
+#            cv.GenerateID(CONF_KM271_ID): cv.use_id(KM271),
             cv.Optional(CONF_WW_TEMP_TARGET): number.number_schema(BuderusParamNumber).extend({
                 cv.GenerateID(): cv.declare_id(BuderusParamNumber),
                 cv.Optional(CONF_MAX_VALUE, default=60): cv.float_,
