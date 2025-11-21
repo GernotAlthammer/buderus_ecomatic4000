@@ -17,6 +17,7 @@
 ### 2025-03-05 Removed custom component (as not supported by ESPHome 2025 anymore)
 ### 2025-03-09 Changes WIFI Fallback Password
 ### 2025-03-16 Added HK1 Raumisttemperatur (Message A11F)
+### 2025-08-31 Adde switch safe_mode
 ### 2025-11-21 Removed include of uart_read_line_sensor
 ### 2025-11-21 Change to inlude external compunents from Github
 ###
@@ -122,6 +123,31 @@ km271_wifi:
   - id: budoil
     uart_id: uart_bus
 
+
+#### Globale Variablen ###########################################
+globals:
+  - id: heizzeit_value
+    type: uint8_t
+    restore_value: yes
+    initial_value: '0x00'  # Standard: "Lang" = 0x00
+
+  - id: sommerzeit_auto_value
+    type: uint8_t
+    restore_value: yes
+    initial_value: '0x00'  # Standard: "Ja" = 0x01
+
+  # Persistente Globals für Datumsangaben im Format TT:MM:YY
+  - id: ferienanfang_date
+    type: std::string
+    restore_value: yes
+    initial_value: '"01:01:25"'
+
+  - id: ferienende_date
+    type: std::string
+    restore_value: yes
+    initial_value: '"01:01:25"'
+
+
 #### UART ########################################################
 # RS232 Serielle Schnittstelle mit 2400 baud UART über GPIOs (TX-pin: GPIO1 # TXD RX-pin: GPIO3 # RXD)
 uart:
@@ -186,6 +212,46 @@ light:
 
 #### BUTTON ######################################################
 button:
+
+################## Ferienzeiten einstellen ECOMATIC 4000 HS4201
+- platform: template
+  name: "Ferienzeit einstellen"
+  id: km271_ferienzeit_einstellen
+  on_press:
+    then:
+      - lambda: |-
+          // Funktion zum Parsen eines Datum-Strings im Format "TT:MM:YY"
+          auto parse_date = [](const std::string &date_str) -> std::tuple<int, int, int> {
+            int tag = std::stoi(date_str.substr(0, 2));
+            int monat = std::stoi(date_str.substr(3, 2));
+            int two_digit_year = std::stoi(date_str.substr(6, 2));
+            int jahr = 2000 + two_digit_year;
+            return { tag, monat, jahr };
+          };
+
+          int start_tag, start_monat, start_jahr;
+          int end_tag, end_monat, end_jahr;
+          std::tie(start_tag, start_monat, start_jahr) = parse_date( id(ferienanfang_date) );
+          std::tie(end_tag, end_monat, end_jahr) = parse_date( id(ferienende_date) );
+          ESP_LOGD("km271-Ferien", "Start: %i.%i.%i Ende: %i.%i.%i", start_tag, start_monat, start_jahr, end_tag, end_monat, end_jahr);
+          
+          // Hier wird der Jahreswert vor dem übertragen um den Wert 1900 verringert.
+          uint8_t jahr_byte = start_jahr - 1900;
+          
+          uint8_t data[9];
+          data[0] = 0x01;
+          data[1] = 0xAC;
+          data[2] = 0x00;
+          data[3] = 0x00;
+          data[4] = start_tag;
+          data[5] = start_monat;
+          data[6] = jahr_byte;
+          data[7] = end_tag;
+          data[8] = end_monat;
+          ESP_LOGD("km271-Ferien Hex", "UART-Befehl gesendet: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
+          budoil->writer.enqueueTelegram(data, 9);
+
+
 ################## Steuertasten Betriebsarten ECOMATIC 4000 HS4201
 # Umschaltung auf Tag-Betrieb Manuell
 - platform: template
@@ -257,30 +323,111 @@ button:
 
 ##################################################################
 
+
+# Hier kommen zwei Eingabefelder (text), die über das Dashboard (z. B. in Home Assistant) bearbeitbar sind.
+# Beim Ändern von "Ferienanfang" wird der neue Wert gespeichert und gleichzeitig "Ferienende" aktualisiert,
+# sofern letzteres sonst einen früheren Zeitpunkt hätte.
+text:
+  - platform: template
+    mode: text
+    optimistic: true
+    min_length: 8
+    max_length: 8
+    name: "Ferienanfang"
+    id: ferienanfang_picker
+    initial_value: "01:07:25"
+    on_value:
+      then:
+        - lambda: |-
+            // Den neuen Wert (als String im Format "TT:MM:YY") aus dem Eingabefeld übernehmen
+            std::string new_date = x;
+            // Global für Ferienanfang aktualisieren
+            id(ferienanfang_date) = new_date;
+            ESP_LOGD("date", "Ferienanfang gesetzt auf %s", new_date.c_str());
+            
+            // Funktion zum Parsen eines Datumsstrings "TT:MM:YY" in ein std::tm-Objekt.
+            auto parse_date = [](const std::string &date_str) -> std::tm {
+              std::tm t = {};
+              t.tm_mday  = std::stoi(date_str.substr(0,2));
+              t.tm_mon   = std::stoi(date_str.substr(3,2)) - 1;
+              // Für tm_year: 2000 wird zu 100 (da tm_year seit 1900 gezählt wird)
+              t.tm_year  = std::stoi(date_str.substr(6,2)) + 100;
+              return t;
+            };
+
+            std::tm start = parse_date(new_date);
+            std::tm current_end = parse_date( id(ferienende_date) );
+            std::time_t start_time = std::mktime(&start);
+            std::time_t end_time = std::mktime(&current_end);
+            if (end_time < start_time) {
+              // Falls das bisherige Ferienende vor dem neuen Ferienanfang liegt: auch Ferienende anpassen
+              id(ferienende_date) = new_date;
+              id(ferienende_picker).publish_state(new_date);
+              ESP_LOGD("date", "Ferienende automatisch auf %s aktualisiert", new_date.c_str());
+            }
+
+  - platform: template
+    mode: text
+    optimistic: true
+    min_length: 8
+    max_length: 8
+    name: "Ferienende"
+    id: ferienende_picker
+    initial_value: "01:07:25"
+    on_value:
+      then:
+        - lambda: |-
+            std::string new_date = x;
+            auto parse_date = [](const std::string &date_str) -> std::tm {
+              std::tm t = {};
+              t.tm_mday  = std::stoi(date_str.substr(0,2));
+              t.tm_mon   = std::stoi(date_str.substr(3,2)) - 1;
+              t.tm_year  = std::stoi(date_str.substr(6,2)) + 100;
+              return t;
+            };
+
+            std::tm start = parse_date( id(ferienanfang_date) );
+            std::tm end   = parse_date(new_date);
+            std::time_t start_time = std::mktime(&start);
+            std::time_t new_end_time = std::mktime(&end);
+
+            // Das Feld "Ferienende" darf nicht früher liegen als "Ferienanfang"
+            if (new_end_time < start_time) {
+              ESP_LOGW("date", "Das gewählte Ferienende (%s) liegt vor dem Ferienanfang (%s). Änderung wird nicht übernommen.", 
+                        new_date.c_str(), id(ferienanfang_date).c_str());
+              // Das Eingabefeld Ferienende wieder auf den aktuellen (gültigen) Wert setzen:
+              id(ferienende_picker).publish_state( id(ferienanfang_date) );
+              id(ferienende_date) = id(ferienanfang_date);
+            } else {
+              id(ferienende_date) = new_date;
+              ESP_LOGD("date", "Ferienende gesetzt auf %s", new_date.c_str());
+            }
+
+
 #### NUMBER ######################################################
 number:
 # Below is the real example stuff
   - platform: km271_wifi
-    config_ww_temperature:
+    config_ww_temp_target:
       name: "Warmwassersolltemperatur Tag"
       id: warmwassersolltemperatur_tag
-      mode: slider
+      mode: box
     config_heating_circuit_1_design_temperature:
       name: "Auslegungstemperatur"
       id: auslegungstemperatur
-      mode: slider
+      mode: box
     config_heating_circuit_1_room_target_temperature_day:
       name: "HK1 Raumsolltemperatur Tag"
       id: heizkreis1_raumsolltemperatur_tag
-      mode: slider
+      mode: box
     config_heating_circuit_1_room_temperature_offset:
       name: "HK1 Raumtemperatur Offset"
       id: heizkreis_1_raumtemperatur_offset
-      mode: slider
+      mode: box
     config_heating_circuit_1_flow_temperature_max:
       name: "HK1 Heizkreistemperaur Maximal"
       id: heizkreis_1_heizkreistemperatur_maximal
-      mode: slider
+      mode: box
 
 #### SELECT ######################################################    
 select:
@@ -289,6 +436,42 @@ select:
     config_heating_circuit_1_operation_mode:
       name: "HK1 Betriebsmodus"
       id: heizkreis_1_betriebsmodus
+
+  - platform: template
+    name: "Heizzeiteingabe"
+    id: heizzeit_select
+    options:
+      - "Lang"
+      - "Kurz"
+    initial_option: "Lang"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (x == "Lang") {
+            id(heizzeit_value) = 0x00;
+          } else {
+            id(heizzeit_value) = 0x01;
+          }
+          // Neues UART-Kommando absenden
+          //id(sende_uart)();
+
+  - platform: template
+    name: "Sommerzeit automatisch"
+    id: sommerzeit_auto_select
+    options:
+      - "Ja"
+      - "Nein"
+    initial_option: "Ja"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          if (x == "Ja") {
+            id(sommerzeit_auto_value) = 0x01;
+          } else {
+            id(sommerzeit_auto_value) = 0x00;
+          }
+          // Auch hier das Kommando absenden
+          //id(sende_uart)(); //
 
 
 #### BINARY SENSOR ###############################################
@@ -504,6 +687,11 @@ sensor:
       id: brennerlaufzeit_2
       entity_category: ""
 
+    config_ww_temperature:
+      name: "Warmwassertemperatur Ziel"
+      id: warmwassertemperatur_ziel
+      entity_category: ""
+
   # WiFi Signal als Sensor
   - platform: wifi_signal
     name: "WiFi Strenght"
@@ -547,7 +735,10 @@ switch:
   - platform: restart
     name: "ESP32 Restart"
     id: buderus_wifi_restart
-    entity_category: "diagnostic"
+  - platform: safe_mode
+    name: "Restart (Safe Mode)"
+    id: buderus_safe_mode
+    
   - platform: template
     name: "KM271 UART RX"
     id: km271_uart_rx
