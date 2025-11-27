@@ -30,10 +30,60 @@ esphome:
 #  includes:
 #    - uart_read_line_sensor.h
  
+  # Beim Booten wird geprüft, ob die gespeicherten Datumswerte schon vergangen sind.
+
+  on_boot:
+    priority: -10
+    then:
+      - lambda: |-
+          // Code erwartet Datumsformat: "TT:MM:YY" (Länge 8, z.B. "01:07:22")
+          auto parse_date = [](const std::string &date_str) -> std::tuple<int, int, int> {
+            int day = std::stoi(date_str.substr(0, 2));
+            int month = std::stoi(date_str.substr(3, 2));
+            // Zwei Ziffern: Wir rechnen damit, dass das Datum post-2000 liegt:
+            int two_digit_year = std::stoi(date_str.substr(6, 2));
+            int year = 2000 + two_digit_year;
+            //return std::make_tuple(day, month, two_digit_year);
+            return std::make_tuple(day, month, year);
+          };
+
+          // Hole den aktuellen Zeitpunkt von der Zeitkomponente
+          auto now = id(my_time).now();
+          if (!now.is_valid()) {
+            ESP_LOGW("init", "Zeit noch nicht synchronisiertspätere Prüfung erfolgt");
+            return;
+          }
+
+          // Funktion, die das gespeicherte Datum mit der aktuellen Zeit vergleicht.
+          // Liegt es in der Vergangenheit, wird es auf das aktuelle Datum aktualisiert.
+          auto check_and_update = [&parse_date, now](std::string &date_str, const char* label) {
+            int day, month, year;
+            std::tie(day, month, year) = parse_date(date_str);
+            std::tm stored = {};
+            stored.tm_mday = day;
+            stored.tm_mon  = month - 1;
+            stored.tm_year = year - 1;  // Notwendig für std::mktime()
+            std::time_t stored_time = std::mktime(&stored);
+            std::time_t current_time = now.timestamp;
+            if (stored_time < current_time) {
+              char buf[9];  // Format "TT:MM:YY" plus Null-Terminierung
+              std::strftime(buf, sizeof(buf), "%d:%m:%y", std::localtime(&current_time));
+              date_str = std::string(buf);
+              ESP_LOGD("init", "%s wurde aktualisiert auf: %s", label, buf);
+            }
+          };
+
+          // Überprüfe und aktualisiere die persistierten Datumswerte
+          check_and_update( id(ferienanfang_date), "Ferienanfang");
+          check_and_update( id(ferienende_date), "Ferienende");
+
+
+
 esp32:
   board: esp32dev
   framework:
-    type: arduino
+    #type: arduino
+    type: esp-idf
 
 # enabel Web Server Interface
 #web_server:
@@ -91,7 +141,7 @@ wifi:
     ssid: "Buderus Fallback Hotspot"
     password: "1234567890" # No Password
 
-  # Sets up Bluetooth LE (Only on ESP32) to allow the user
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
 # to provision wifi credentials to the device.
 esp32_improv:
   authorizer: none
@@ -106,6 +156,12 @@ esp32_improv:
 
 #bluetooth_proxy:
 #  active: true
+
+
+#### LOCAL TIME ##################################################
+time:
+  - platform: sntp
+    id: my_time
 
 
 captive_portal:
@@ -759,6 +815,18 @@ text_sensor:
     firmware_version:
       name: "Firmware Steuerung"
       id: firmwareversion_steuerung
+
+  # Template-Text-Sensoren, um die momentan gültigen Datumswerte anzuzeigen (z. B. in einem Dashboard oder am Log)
+  - platform: template
+    name: "Ferienanfang Datum"
+    id: ferienanfang_display
+    lambda: |-
+      return { id(ferienanfang_date) };
+  - platform: template
+    name: "Ferienende Datum"
+    id: ferienende_display
+    lambda: |-
+      return { id(ferienende_date) };
 
 #  # RS232 data as Text-Sensor ## Removed as not supported by ESPhome 2025
 #  - platform: custom
