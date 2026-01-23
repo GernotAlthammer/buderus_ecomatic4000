@@ -20,13 +20,21 @@
 ### 2025-08-31 Adde switch safe_mode
 ### 2025-11-21 Removed include of uart_read_line_sensor
 ### 2025-11-21 Change to inlude external compunents from Github
+### 2026-01-09 Change text fields "Ferienanfang" and "Ferienende" to store in flash
+### 2026-01-10 Added Uptime Text-Sensor
 ###
+# These substitutions allow the end user to override certain values
+substitutions:
+  name: "buderus-km271"
+  friendly_name: "Buderus-KM271"
+
 esphome:
-  name: buderus-km271
+  name: "${name}"
   comment: "ESP32 Buderus Ecomatic 4000 KM2.0 RS232 Interface 3964R"
+  friendly_name: "${friendly_name}"
   project:
     name: "ESP32.Buderus Ecomatic 4000"
-    version: "2024.11.24"
+    version: "2026.01.09"
 #  includes:
 #    - uart_read_line_sensor.h
  
@@ -135,6 +143,8 @@ wifi:
     password: !secret wifi_password
   - ssid: !secret wifi_ssid_2
     password: !secret wifi_password_2
+  use_address: ${name}.local
+  min_auth_mode: WPA2
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -391,7 +401,8 @@ text:
     max_length: 8
     name: "Ferienanfang"
     id: ferienanfang_picker
-    initial_value: "01:07:25"
+    initial_value: "01:07:26"
+    restore_value: true
     on_value:
       then:
         - lambda: |-
@@ -420,6 +431,8 @@ text:
               id(ferienende_date) = new_date;
               id(ferienende_picker).publish_state(new_date);
               ESP_LOGD("date", "Ferienende automatisch auf %s aktualisiert", new_date.c_str());
+              // Meldung in Home-Assisant anzeigen.
+              id(note_ferienanfang).execute();
             }
 
   - platform: template
@@ -429,7 +442,8 @@ text:
     max_length: 8
     name: "Ferienende"
     id: ferienende_picker
-    initial_value: "01:07:25"
+    initial_value: "01:07:26"
+    restore_value: true
     on_value:
       then:
         - lambda: |-
@@ -454,9 +468,13 @@ text:
               // Das Eingabefeld Ferienende wieder auf den aktuellen (gültigen) Wert setzen:
               id(ferienende_picker).publish_state( id(ferienanfang_date) );
               id(ferienende_date) = id(ferienanfang_date);
+              // Meldung in Home-Assisant anzeigen.
+              id(note_ferienende_error).execute();
             } else {
               id(ferienende_date) = new_date;
               ESP_LOGD("date", "Ferienende gesetzt auf %s", new_date.c_str());
+              // Meldung in Home-Assisant anzeigen.
+              id(note_ferienende).execute();
             }
 
 
@@ -484,6 +502,7 @@ number:
       name: "HK1 Heizkreistemperaur Maximal"
       id: heizkreis_1_heizkreistemperatur_maximal
       mode: box
+
 
 #### SELECT ######################################################    
 select:
@@ -785,6 +804,13 @@ sensor:
     id: buderus_internal_temp
     update_interval: 60s
 
+  - platform: uptime
+    name: "Uptime Sekunden"
+    id: uptime_s
+    update_interval: 60s
+    internal: true
+
+
 #### SWITCH ######################################################
 switch:
   # Neustart des ESP32
@@ -807,6 +833,36 @@ switch:
               return vec;
         - delay: 1sec
         - switch.turn_off: km271_uart_rx
+
+
+#### SCRIPT ######################################################
+script:
+  - id: note_ferienanfang
+    then:
+      - homeassistant.service:
+          service: persistent_notification.create
+          data:
+            title: "HINWEIS von ${friendly_name}"
+          data_template:
+            message: "Ferienanfang wurde übernommen. Das Ferienende wurde automatisch aktualisiert."
+
+  - id: note_ferienende_error
+    then:
+      - homeassistant.service:
+          service: persistent_notification.create
+          data:
+            title: "HINWEIS von ${friendly_name}"
+          data_template:
+            message: "Das gewählte Ferienende liegt vor dem Ferienanfang. Änderung wird nicht übernommen."
+
+  - id: note_ferienende
+    then:
+      - homeassistant.service:
+          service: persistent_notification.create
+          data:
+            title: "HINWEIS von ${friendly_name}"
+          data_template:
+            message: "Ferienende wurde übernommen."
 
 
 #### TEXT SENSOR #################################################
@@ -859,5 +915,32 @@ text_sensor:
   - platform: version
     name: "ESPHome Version"
     id: buderus_esphome_version
+
+  - platform: template
+    name: "Uptime"
+    lambda: |-
+      uint32_t dur = id(uptime_s).state;
+      int dys = 0;
+      int hrs = 0;
+      int mnts = 0;
+      if (dur > 86399) {
+        dys = dur / 86400;
+        dur -= dys * 86400;
+      }
+      if (dur > 3599) {
+        hrs = dur / 3600;
+        dur -= hrs * 3600;
+      }
+      if (dur > 59) {
+        mnts = dur / 60;
+        dur -= mnts * 60;
+      }
+      // Increased buffer size to 32 to prevent overflow
+      char buffer[32];
+      sprintf(buffer, "%uT %02uH %02uM %02uS", dys, hrs, mnts, dur);
+      return {buffer};
+    icon: mdi:clock-start
+    update_interval: 60s
+    entity_category: diagnostic
 
 #### END ########################################################
