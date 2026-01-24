@@ -1,0 +1,113 @@
+#### Templates included in configuration.yaml ####
+#### Custom templates ########
+# template:
+
+################################################################################
+#### Buderus Heizungsanlage ####################################################
+###
+### Ölverbrauch und Heizwert berechnen
+  - sensor:
+    - unique_id: buderus_oelverbrauch
+      unit_of_measurement: "l/h"
+      default_entity_id: sensor.oelverbrauch
+      name: "Ölverbrauch"
+      state: >
+        {% if is_state('binary_sensor.brenner_ein', 'on') %}
+          {{ 2.26 }}
+        {% else %}
+          {{ 0 }}
+        {% endif %}
+
+  - sensor:
+    - unique_id: buderus_heizwert
+      device_class: power
+      unit_of_measurement: "kW"
+      default_entity_id: sensor.heizwert
+      name: "Heizwert"
+      state: >
+        {% if is_state('binary_sensor.brenner_ein', 'on') %}
+          {{ 2.26 * 9.8 }}
+        {% else %}
+          {{ 0 }}
+        {% endif %}
+
+#### Buderus Gebläsemotor mit 240 Watt Verbrauch
+  - sensor:
+    - unique_id: sensor.brenner_leistung
+      device_class: power
+      unit_of_measurement: "W"
+      default_entity_id: sensor.brenner_leistung
+      icon: mdi:water-boiler
+      name: "Brenner Leistung"
+      state: >
+        {% if is_state('binary_sensor.brenner_ein', 'on' ) %}
+          240
+        {% else %}
+          10
+        {% endif %}
+
+#### Pumpe Heizkreis Fussboden auf Stufe 2 mit 50 Watt Verbauch
+  - sensor:
+    - unique_id: sensor.pumpe_fb_leistung
+      device_class: POWER
+      unit_of_measurement: W
+      default_entity_id: sensor.pumpe_fb_leistung
+      icon: mdi:lightning-bolt-circle
+      name: "Pumpe FB"
+      state: >-
+        {% if is_state('binary_sensor.btr_bit_2_an', 'off') %}  
+          {% if is_state('binary_sensor.zirkulationspumpe_fussboden', 'on') or is_state('binary_sensor.zirkulationspumpe_fussboden_2', 'on') %}
+            50
+          {% else %}
+            0
+          {% endif %}
+        {% else %}
+          0
+        {% endif %}
+
+#### Pumpe Heizkreis Heizkörper auf Stufe 1 mit 40 Watt Verbauch
+  - sensor:
+    - unique_id: sensor.pumpe_hk_leistung
+      device_class: POWER
+      unit_of_measurement: W
+      default_entity_id: sensor.pumpe_hk_leistung
+      icon: mdi:lightning-bolt-circle
+      name: "Pumpe HK"
+      state: >-
+        {% if is_state('binary_sensor.zirkulationspumpe_heizkorper', 'on' ) %}
+          40
+        {% elif is_state('binary_sensor.zirkulationspumpe_heizkorper_2', 'on' ) %}
+          40
+        {% else %}
+          0
+        {% endif %}
+
+#### Pumpe Warmwasser Aufladung auf Stufe 3 mit 75 Watt Verbauch
+  - sensor:
+    - unique_id: sensor.pumpe_ww_leistung
+      device_class: POWER
+      unit_of_measurement: W
+      default_entity_id: sensor.pumpe_ww_leistung
+      icon: mdi:lightning-bolt-circle
+      name: "Pumpe WW"
+      state: >-
+        {% if is_state('binary_sensor.ladepumpe_warmwasser', 'on' ) %}
+          75
+        {% else %}
+          0
+        {% endif %}
+
+
+##### Heizöl Restbestand #######################################################
+  - sensor:
+      - name: "Heizöl Restbestand"
+        unique_id: "buderus_oelrestbestand"  # Ensure this is unique
+        unit_of_measurement: "L"
+        device_class: volume
+        state_class: measurement
+        state: >
+          {% set fill_amount = states('input_number.heizoel_fill_amount') | float(0) %}
+          {% set fill_consumption = states('input_number.heizoel_fill_consumption') | float(0) %}
+          {% set current_consumption = states('sensor.heizol_menge') | float(0) %}
+          {{ (fill_amount - (current_consumption - fill_consumption)) | round(2) }}
+
