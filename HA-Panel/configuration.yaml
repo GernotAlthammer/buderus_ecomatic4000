@@ -1,0 +1,29 @@
+#### INCLUDE ##################################################
+####
+#### Load other configuration files. do not remove.
+sensor: !include sensors.yaml
+template: !include templates.yaml
+
+
+#### INPUT NUMBER ##############################################
+input_number:
+  #### BUDERUS Heizung Heizöl-Resatbestand
+  heizoel_fill_amount:
+    name: "Heizöl Nachfüllmenge"
+    icon: mdi:storage-tank
+    min: 0
+    max: 4500
+    step: 1
+    unit_of_measurement: "L"
+    mode: box
+
+  heizoel_fill_consumption:
+    name: "Heizölverbrauch bei Füllung"
+    icon: mdi:fire
+    min: 0
+    max: 500000
+    step: 1
+    unit_of_measurement: "L"
+    mode: box
+
+################################################################################
