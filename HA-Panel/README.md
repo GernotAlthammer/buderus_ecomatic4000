@@ -3,7 +3,9 @@
 This are example files of the Home Assistant Panel to show the values of the Buduerus Ecomatic 4000 HS4201 control unit
 
 - the file Buderus.yaml is the RAW file for the HA panel
-- the file HA-Settings.yaml is the collection of template sensors used in the HA panel
+- the file configuration.yaml is to inlude the sensors (templates.yaml, sensors.yaml) and to add input numbers used in the HA panel
+- the file template.yaml is for the "template sensor" configuration
+- the file sensors.yaml is for the "sensors" configuration
 
 In addition for Home Assistant the following helpers are needed:
 
