@@ -12,15 +12,15 @@ views:
               - entity: binary_sensor.brenner_ein
                 name: Öl-Brenner
                 icon: mdi:fire
-              - entity: sensor.aussentemperatur
+              - entity: sensor.buderus_km271_aussentemperatur
                 name: Außen-Temperatur
-              - entity: sensor.kesselvorlaufisttemperatur
+              - entity: sensor.buderus_km271_kesselvorlaufisttemperatur
                 secondary_info: none
                 name: Kessel-Temperatur
-              - entity: sensor.warmwasseristtemperatur
+              - entity: sensor.buderus_km271_warmwasseristtemperatur
                 secondary_info: none
                 name: Warmwasser-Temperatur
-              - entity: sensor.hk1_vorlaufisttemperatur
+              - entity: sensor.buderus_km271_hk1_vorlaufisttemperatur
                 secondary_info: none
                 name: Fußboden Vorlauftemperatur
                 icon: ''
@@ -36,13 +36,13 @@ views:
                 action: none
           - type: entities
             entities:
-              - entity: sensor.kesselvorlaufsolltemperatur
+              - entity: sensor.buderus_km271_kesselvorlaufsolltemperatur
                 name: Kesseltemperatur (Soll)
-              - entity: sensor.warmwassersolltemperatur
+              - entity: sensor.buderus_km271_warmwassersolltemperatur
                 name: Warmwasser (Soll)
-              - entity: sensor.hk1_vorlaufsolltemperatur
+              - entity: sensor.buderus_km271_hk1_vorlaufsolltemperatur
                 name: Fußboden-Vorlauf (Soll)
-              - entity: sensor.hk1_mischerstellung
+              - entity: sensor.buderus_km271_hk1_mischerstellung
                 secondary_info: none
                 name: Fußboden Vorlauf-Mischer
                 icon: mdi:valve
@@ -174,7 +174,7 @@ views:
               - graph: line
                 type: sensor
                 detail: 2
-                entity: sensor.internal_temp
+                entity: sensor.buderus_km271_internal_temp
               - graph: line
                 type: sensor
                 detail: 2
@@ -182,8 +182,8 @@ views:
           - type: entities
             entities:
               - entity: binary_sensor.wifi_status
-              - entity: sensor.wifi_strenght
-              - entity: sensor.wifi_percent
+              - entity: sensor.buderus_km271_wifi_strenght
+              - entity: sensor.buderus_km271_wifi_percent
               - entity: switch.shelly1pm_349454784b56
             state_color: true
             show_header_toggle: false
