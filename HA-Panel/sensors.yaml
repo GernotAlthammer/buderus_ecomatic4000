@@ -1,0 +1,50 @@
+#### Sensors included in configuration.yaml ####
+#### Custom Sensors
+#### sensor:
+
+################################################################################
+#### Buderus Heizungsanlage ####################################################
+###
+### Berenner-Laufzeit und Anzahl der Brenner-Starts ermitteln
+# Brenner Laufzeit sein 0.00 Uhr
+  - platform: history_stats
+    name: Brenner Laufzeit heute
+    unique_id: sensor.brenner_laufzeit_heute
+    entity_id: binary_sensor.brenner_ein
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+# Brenner Anzahl der Starts sein 0.00 Uhr
+  - platform: history_stats
+    name: Brenner Starts heute
+    unique_id: sensor.brenner_starts_heute
+    entity_id: binary_sensor.brenner_ein
+    state: "on"
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+# Brenner Laufzeit der letzten 24 Stunden
+  - platform: history_stats
+    name: Brenner Laufzeit gestern
+    unique_id: sensor.brenner_laufzeit_gestern
+    entity_id: binary_sensor.brenner_ein
+    state: 'on'
+    type: time
+    end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+    duration:
+      hours: 24
+# Brenner Anzahl der Starts der letzten 24 Stunden
+  - platform: history_stats
+    name: Brenner Starts gestern
+    unique_id: sensor.brenner_starts_gestern
+    entity_id: binary_sensor.brenner_ein
+    state: 'on'
+    type: count
+    end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+    duration:
+      hours: 24
+
+
+
+
