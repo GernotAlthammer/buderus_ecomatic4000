@@ -85,7 +85,11 @@ buderus_ecomatic4000/
 ├── esphome/
 │   └── components/
 │       └── km271_wifi/ # ESPHome custom component (C++ source)
+│           └── const.py         # Constant number map for Ecomatic 4000
 │           └── km271_params.h   # Parameter address map for Ecomatic 4000
+│           └── number.py        # Number definition map for Ecomatic 4000
+│           └── sensor.py        # Sensor definition map for Ecomatic 4000 
+│           └── other files      # other files from the km271 configuration 
 ├── LICENSE
 └── README.md
 ```
@@ -149,11 +153,13 @@ uart:
   baud_rate: 2400
  
 external_components:
-  - source: github://the78mole/esphome_components
+  - source: github://GernotAlthammer/buderus_ecomatic4000/esphome
     components: [km271_wifi]
  
 km271_wifi:
-  uart_id: km271_uart
+  - id: budoil
+    uart_id: km271_uart
+
 ```
  
 > Refer to the actual YAML files in the `esphome/` folder for the complete, tested configuration specific to the Ecomatic 4000.
