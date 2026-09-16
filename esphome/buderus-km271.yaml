@@ -22,6 +22,17 @@
 ### 2025-11-21 Change to inlude external compunents from Github
 ### 2026-01-09 Change text fields "Ferienanfang" and "Ferienende" to store in flash
 ### 2026-01-10 Added Uptime Text-Sensor
+### 2026-03-11 Lambda-Verbesserungen:
+###            [BUGFIX]  on_boot: tm_year = year - 1900 (war year - 1 → falsches mktime-Ergebnis)
+###            [CLEANUP] api/write: uart.write Lambda auf eine Zeile vereinfacht
+###            [CLEANUP] switch/km271_uart_rx: uart.write Lambda auf return {0x10} vereinfacht
+###            [CLEANUP] button/Ferienzeit: data[]-Array als Initializer-Liste zusammengefasst
+###            [CLEANUP] select/Heizzeiteingabe: if/else durch Ternary-Operator ersetzt
+###            [CLEANUP] select/Sommerzeit: if/else durch Ternary-Operator ersetzt
+###            [CLEANUP] text_sensor/Uptime: verschachtelte if-Blöcke durch Modulo-Arithmetik
+###                      und snprintf (buffer-sicher) ersetzt
+### 2026-05-25 Added Button factory_reset
+### 2026-05-25 Remove Last Scan Results - to save memory
 ###
 # These substitutions allow the end user to override certain values
 substitutions:
@@ -70,7 +81,12 @@ esphome:
             std::tm stored = {};
             stored.tm_mday = day;
             stored.tm_mon  = month - 1;
-            stored.tm_year = year - 1;  // Notwendig für std::mktime()
+            // [BUGFIX] std::tm.tm_year zählt Jahre seit 1900.
+            // year enthält z.B. 2026 → 2026 - 1900 = 126 (korrekt für mktime).
+            // Vorher stand hier: year - 1, was z.B. 2025 ergab und damit
+            // mktime() den Wert als Jahr 3925 interpretierte → jedes gespeicherte
+            // Datum lag immer in der Vergangenheit und wurde beim Booten überschrieben.
+            stored.tm_year = year - 1900;
             std::time_t stored_time = std::mktime(&stored);
             std::time_t current_time = now.timestamp;
             if (stored_time < current_time) {
@@ -124,10 +140,12 @@ api:
 # Write Command
         - uart.write:
             id: uart_bus
+            # [CLEANUP] std::string → std::vector<uint8_t> direkt im return konstruiert.
+            # Vorher waren dafür 3 Zeilen nötig (str anlegen, vec anlegen, return vec).
+            # std::string hat begin()/end()-Iteratoren, der vector-Konstruktor
+            # akzeptiert diese direkt → eine Zeile reicht.
             data: !lambda |-
-              std::string str = command;
-              std::vector<uint8_t> vec(str.begin(), str.end());
-              return vec;
+              return std::vector<uint8_t>(command.begin(), command.end());
 # TX-LED off
         - delay: 0.25sec
         #- output.turn_off: tx_led # RED LED
@@ -221,6 +239,7 @@ uart:
   rx_pin: GPIO3 # RXD
   baud_rate: 2400
   id: uart_bus
+  rx_buffer_size: 2048
   debug:
     direction: BOTH
     dummy_receiver: false
@@ -278,55 +297,60 @@ light:
 
 #### BUTTON ######################################################
 button:
+  - platform: factory_reset
+    id: btn_factory_reset
+    name: "Factory Reset"
 
-################## Ferienzeiten einstellen ECOMATIC 4000 HS4201
-- platform: template
-  name: "Ferienzeit einstellen"
-  id: km271_ferienzeit_einstellen
-  on_press:
-    then:
-      - lambda: |-
-          // Funktion zum Parsen eines Datum-Strings im Format "TT:MM:YY"
-          auto parse_date = [](const std::string &date_str) -> std::tuple<int, int, int> {
-            int tag = std::stoi(date_str.substr(0, 2));
-            int monat = std::stoi(date_str.substr(3, 2));
-            int two_digit_year = std::stoi(date_str.substr(6, 2));
-            int jahr = 2000 + two_digit_year;
-            return { tag, monat, jahr };
-          };
+  ################## Ferienzeiten einstellen ECOMATIC 4000 HS4201
+  - platform: template
+    name: "Ferienzeit einstellen"
+    id: km271_ferienzeit_einstellen
+    on_press:
+      then:
+        - lambda: |-
+            // Funktion zum Parsen eines Datum-Strings im Format "TT:MM:YY"
+            auto parse_date = [](const std::string &date_str) -> std::tuple<int, int, int> {
+              int tag = std::stoi(date_str.substr(0, 2));
+              int monat = std::stoi(date_str.substr(3, 2));
+              int two_digit_year = std::stoi(date_str.substr(6, 2));
+              int jahr = 2000 + two_digit_year;
+              return { tag, monat, jahr };
+            };
+  
+            int start_tag, start_monat, start_jahr;
+            int end_tag, end_monat, end_jahr;
+            std::tie(start_tag, start_monat, start_jahr) = parse_date( id(ferienanfang_date) );
+            std::tie(end_tag, end_monat, end_jahr) = parse_date( id(ferienende_date) );
+            ESP_LOGD("km271-Ferien", "Start: %i.%i.%i Ende: %i.%i.%i", start_tag, start_monat, start_jahr, end_tag, end_monat, end_jahr);
+            
+            // Hier wird der Jahreswert vor dem übertragen um den Wert 1900 verringert.
+            uint8_t jahr_byte = start_jahr - 1900;
+            
+            uint8_t data[9];
+            data[0] = 0x01;
+            data[1] = 0xAC;
+            data[2] = 0x00;
+            data[3] = 0x00;
+            data[4] = start_tag;
+            data[5] = start_monat;
+            data[6] = jahr_byte;
+            data[7] = end_tag;
+            data[8] = end_monat;
+            ESP_LOGD("km271-Ferien Hex", "UART-Befehl gesendet: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
+            budoil->writer.enqueueTelegram(data, 9);
 
-          int start_tag, start_monat, start_jahr;
-          int end_tag, end_monat, end_jahr;
-          std::tie(start_tag, start_monat, start_jahr) = parse_date( id(ferienanfang_date) );
-          std::tie(end_tag, end_monat, end_jahr) = parse_date( id(ferienende_date) );
-          ESP_LOGD("km271-Ferien", "Start: %i.%i.%i Ende: %i.%i.%i", start_tag, start_monat, start_jahr, end_tag, end_monat, end_jahr);
-          
-          // Hier wird der Jahreswert vor dem übertragen um den Wert 1900 verringert.
-          uint8_t jahr_byte = start_jahr - 1900;
-          
-          uint8_t data[9];
-          data[0] = 0x01;
-          data[1] = 0xAC;
-          data[2] = 0x00;
-          data[3] = 0x00;
-          data[4] = start_tag;
-          data[5] = start_monat;
-          data[6] = jahr_byte;
-          data[7] = end_tag;
-          data[8] = end_monat;
-          ESP_LOGD("km271-Ferien Hex", "UART-Befehl gesendet: 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
-          budoil->writer.enqueueTelegram(data, 9);
 
-
-################## Steuertasten Betriebsarten ECOMATIC 4000 HS4201
-# Umschaltung auf Tag-Betrieb Manuell
-- platform: template
-  name: "Tag-Betrieb - Manuell"
-  id: km271_betr_t_manuell
-  on_press:
-    - lambda:
-        uint8_t command[] = {0x31, 0x08, 0x01, 0x10, 0x03, 0x2B};
-        budoil->writer.enqueueTelegram(command, 8);
+  ################## Steuertasten Betriebsarten ECOMATIC 4000 HS4201
+  # Umschaltung auf Tag-Betrieb Manuell
+  - platform: template
+    name: "Tag-Betrieb - Manuell"
+    id: km271_betr_t_manuell
+    on_press:
+      then:
+        - lambda: |-
+            uint8_t command[] = {0x07, 0x00, 0x65, 0x65, 0x65, 0x65, 0x01, 0x65};
+            //uint8_t command[] = {0x31, 0x08, 0x01, 0x10, 0x03, 0x2B};
+            budoil->writer.enqueueTelegram(command, 8);
 #    - uart.write:
 #        id: uart_bus
 #        data: [0x02]
@@ -336,14 +360,16 @@ button:
 #        data: [0x31, 0x08, 0x01, 0x10, 0x03, 0x2B]
 
 
-# Umschaltung auf Tag-Betrieb Automatik
-- platform: template
-  name: "Tag-Betrieb - Automatik"
-  id: km271_betr_t_auto
-  on_press:
-    - lambda:
-        uint8_t command[] = {0x31, 0x08, 0x03, 0x10, 0x03, 0x29};
-        budoil->writer.enqueueTelegram(command, 8);
+  # Umschaltung auf Tag-Betrieb Automatik
+  - platform: template
+    name: "Tag-Betrieb - Automatik"
+    id: km271_betr_t_auto
+    on_press:
+      then:
+        - lambda: |-
+            uint8_t command[] = {0x07, 0x00, 0x65, 0x65, 0x65, 0x65, 0x02, 0x65};
+            //uint8_t command[] = {0x31, 0x08, 0x03, 0x10, 0x03, 0x29};
+            budoil->writer.enqueueTelegram(command, 8);
 #    - uart.write:
 #        id: uart_bus
 #        data: [0x02]
@@ -354,13 +380,15 @@ button:
 
 
 # Umschaltung auf Nacht-Betrieb Manuell
-- platform: template
-  name: "Nacht-Betrieb - Manuell"
-  id: km271_betr_n_manuell
-  on_press:
-    - lambda:
-        uint8_t command[] = {0x31, 0x08, 0x00, 0x10, 0x03, 0x2A};
-        budoil->writer.enqueueTelegram(command, 8);
+  - platform: template
+    name: "Nacht-Betrieb - Manuell"
+    id: km271_betr_n_manuell
+    on_press:
+      then:
+        - lambda: |-
+            uint8_t command[] = {0x07, 0x00, 0x65, 0x65, 0x65, 0x65, 0x02, 0x65};
+            //uint8_t command[] = {0x31, 0x08, 0x03, 0x10, 0x03, 0x29};
+            budoil->writer.enqueueTelegram(command, 8);
 #    - uart.write:
 #        id: uart_bus
 #        data: [0x02]
@@ -375,9 +403,11 @@ button:
   name: "Nacht-Betrieb - Automatik"
   id: km271_betr_n_auto
   on_press:
-    - lambda:
-        uint8_t command[] = {0x31, 0x08, 0x02, 0x10, 0x03, 0x28};
-        budoil->writer.enqueueTelegram(command, 8);
+    then:
+      - lambda: |-
+          uint8_t command[] = {0x07, 0x00, 0x65, 0x65, 0x65, 0x65, 0x02, 0x65};
+          //uint8_t command[] = {0x31, 0x08, 0x02, 0x10, 0x03, 0x28};
+          budoil->writer.enqueueTelegram(command, 8);
 #    - uart.write:
 #        id: uart_bus
 #        data: [0x02]
@@ -522,11 +552,10 @@ select:
     optimistic: true
     set_action:
       - lambda: |-
-          if (x == "Lang") {
-            id(heizzeit_value) = 0x00;
-          } else {
-            id(heizzeit_value) = 0x01;
-          }
+          // [CLEANUP] if/else durch Ternary-Operator ersetzt.
+          // "Lang" → 0x00, alles andere ("Kurz") → 0x01.
+          // Da die options fest definiert sind, ist ein else-Fall nicht möglich.
+          id(heizzeit_value) = (x == "Lang") ? 0x00 : 0x01;
           // Neues UART-Kommando absenden
           //id(sende_uart)();
 
@@ -540,11 +569,9 @@ select:
     optimistic: true
     set_action:
       - lambda: |-
-          if (x == "Ja") {
-            id(sommerzeit_auto_value) = 0x01;
-          } else {
-            id(sommerzeit_auto_value) = 0x00;
-          }
+          // [CLEANUP] if/else durch Ternary-Operator ersetzt.
+          // "Ja" → 0x01, alles andere ("Nein") → 0x00.
+          id(sommerzeit_auto_value) = (x == "Ja") ? 0x01 : 0x00;
           // Auch hier das Kommando absenden
           //id(sende_uart)(); //
 
@@ -714,8 +741,8 @@ sensor:
       name: "HK1 Raumisttemperatur"
       id: hk1_raumisttemperatur
       entity_category: ""
-      filters: ## Bei ECOMATIC ist die Temperatur der Wert geteilt duch 10
-      - multiply: !lambda return 0.1;
+      #filters: ## Bei ECOMATIC ist die Temperatur der Wert geteilt duch 10
+      #- multiply: !lambda return 0.1;
 
     heating_circuit_1_pump_power:
       name: "HK1 Pumpenleistung"
@@ -725,6 +752,11 @@ sensor:
     heating_circuit_1_mixer_position:
       name: "HK1 Mischerstellung"
       id: hk1_mischerstellung
+      entity_category: ""
+
+    heating_circuit_2_flow_temperature:
+      name: "HK2 Vorlaufisttemperatur"
+      id: hk2_vorlaufisttemperatur
       entity_category: ""
 
     ww_target_temperature:
@@ -827,10 +859,11 @@ switch:
     turn_on_action:
         - uart.write:
             id: uart_bus
-            data: !lambda |-
-              std::string str = "\x10";
-              std::vector<uint8_t> vec(str.begin(), str.end());
-              return vec;
+            # [CLEANUP] Ein einzelnes Byte 0x10 muss nicht erst als std::string
+            # angelegt und dann in einen vector konvertiert werden.
+            # Eine Brace-Init-Liste {0x10} erzeugt direkt einen std::vector<uint8_t>
+            # mit einem Element → 3 Zeilen werden zu einer.
+            data: !lambda return {0x10};
         - delay: 1sec
         - switch.turn_off: km271_uart_rx
 
@@ -902,15 +935,15 @@ text_sensor:
     ssid:
       name: "SSID"
       id: buderus_ssid
-    bssid:
-      name: "BSSID"
-      id: buderus_bssid
+    #bssid:
+    #  name: "BSSID"
+    #  id: buderus_bssid
     mac_address:
       name: "Mac Address"
       id: buderus_mac
-    scan_results:
-      name: Scan Result"
-      id: buderus_scan
+    #scan_results:
+    #  name: Scan Result"
+    #  id: buderus_scan
   # ESP Version
   - platform: version
     name: "ESPHome Version"
@@ -919,25 +952,18 @@ text_sensor:
   - platform: template
     name: "Uptime"
     lambda: |-
-      uint32_t dur = id(uptime_s).state;
-      int dys = 0;
-      int hrs = 0;
-      int mnts = 0;
-      if (dur > 86399) {
-        dys = dur / 86400;
-        dur -= dys * 86400;
-      }
-      if (dur > 3599) {
-        hrs = dur / 3600;
-        dur -= hrs * 3600;
-      }
-      if (dur > 59) {
-        mnts = dur / 60;
-        dur -= mnts * 60;
-      }
-      // Increased buffer size to 32 to prevent overflow
+      // [CLEANUP] Modulo-Arithmetik statt verschachtelter if-Blöcke mit Subtraktion.
+      // Vorher wurde dur in einer Hilfsvariable schrittweise abgebaut (3× if + 3× -=).
+      // Modulo liefert die Teilwerte direkt ohne die Variable zu verändern,
+      // der Code ist kürzer und zeigt die Rechenlogik explizit.
+      // snprintf statt sprintf: prüft die Puffergröße und verhindert Buffer-Overflow.
+      uint32_t dur  = (uint32_t)id(uptime_s).state;
+      uint32_t dys  = dur / 86400;
+      uint32_t hrs  = (dur % 86400) / 3600;
+      uint32_t mnts = (dur % 3600)  / 60;
+      uint32_t secs = dur % 60;
       char buffer[32];
-      sprintf(buffer, "%uT %02uH %02uM %02uS", dys, hrs, mnts, dur);
+      snprintf(buffer, sizeof(buffer), "%luT %02luH %02luM %02luS", dys, hrs, mnts, secs);
       return {buffer};
     icon: mdi:clock-start
     update_interval: 60s
